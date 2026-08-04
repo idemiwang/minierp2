@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 
 import db
 import id_generator
+import inventory_closing
 from excel.exporters import export_document
 
 bp = Blueprint("inbound", __name__)
@@ -84,6 +85,8 @@ def create_view():
                         "VALUES (%s, %s, %s, %s, %s)",
                         (new_id, line_num, pid, pname, qty),
                     )
+                for pid in {pid for pid, _, _ in lines}:
+                    inventory_closing.recalculate(pid)
 
         new_id = id_generator.generate_with_retry(id_generator.next_inbound_id, insert)
         flash(f"已新增入庫單 {new_id}", "success")
@@ -135,6 +138,9 @@ def edit_view(inbound_id):
                     "VALUES (%s, %s, %s, %s, %s)",
                     (inbound_id, line_num, pid, pname, qty),
                 )
+            affected = {r["ProductId"] for r in existing_lines} | {pid for pid, _, _ in lines}
+            for pid in affected:
+                inventory_closing.recalculate(pid)
         flash("已更新入庫單", "success")
         return redirect(url_for("inbound.detail_view", inbound_id=inbound_id))
 
@@ -148,10 +154,15 @@ def edit_view(inbound_id):
 
 @bp.route("/<inbound_id>/delete", methods=["POST"])
 def delete_view(inbound_id):
+    affected = {r["ProductId"] for r in db.query(
+        "SELECT DISTINCT ProductId FROM dbo.InboundDetail WHERE InboundId = %s", (inbound_id,)
+    )}
     with db.transaction() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM dbo.InboundDetail WHERE InboundId = %s", (inbound_id,))
         cur.execute("DELETE FROM dbo.InboundHeader WHERE InboundId = %s", (inbound_id,))
+        for pid in affected:
+            inventory_closing.recalculate(pid)
     flash("已刪除入庫單", "success")
     return redirect(url_for("inbound.list_view"))
 

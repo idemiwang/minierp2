@@ -25,6 +25,7 @@ MENU = [
         "links": [
             {"title": "入出單據", "endpoint": "reports.header_view"},
             {"title": "入出明細", "endpoint": "reports.detail_view"},
+            {"title": "日結餘額表", "endpoint": "reports.closing_view"},
         ],
     },
 ]

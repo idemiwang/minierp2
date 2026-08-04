@@ -4,6 +4,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 
 import db
 import id_generator
+import inventory_closing
 from excel.exporters import export_document
 
 bp = Blueprint("outbound", __name__)
@@ -75,6 +76,8 @@ def create_view():
                         "VALUES (%s, %s, %s, %s, %s)",
                         (new_id, line_num, pid, pname, qty),
                     )
+                for pid in {pid for pid, _, _ in lines}:
+                    inventory_closing.recalculate(pid)
 
         new_id = id_generator.generate_with_retry(id_generator.next_outbound_id, insert)
         flash(f"已新增出庫單 {new_id}", "success")
@@ -100,6 +103,10 @@ def edit_view(outbound_id):
         outbound_date = request.form.get("outbound_date") or header["OutboundDate"]
         employee_id = request.form.get("employee_id", "")
         lines = _parse_lines(request.form, product_map)
+        existing_lines = db.query(
+            "SELECT ProductId, Quantity FROM dbo.OutboundDetail WHERE OutboundId = %s ORDER BY LineNum",
+            (outbound_id,),
+        )
 
         if not employee_id or not lines:
             flash("請選擇員工,且至少需要一筆明細(數量需大於 0)", "error")
@@ -122,6 +129,9 @@ def edit_view(outbound_id):
                     "VALUES (%s, %s, %s, %s, %s)",
                     (outbound_id, line_num, pid, pname, qty),
                 )
+            affected = {r["ProductId"] for r in existing_lines} | {pid for pid, _, _ in lines}
+            for pid in affected:
+                inventory_closing.recalculate(pid)
         flash("已更新出庫單", "success")
         return redirect(url_for("outbound.detail_view", outbound_id=outbound_id))
 
@@ -135,10 +145,15 @@ def edit_view(outbound_id):
 
 @bp.route("/<outbound_id>/delete", methods=["POST"])
 def delete_view(outbound_id):
+    affected = {r["ProductId"] for r in db.query(
+        "SELECT DISTINCT ProductId FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,)
+    )}
     with db.transaction() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,))
         cur.execute("DELETE FROM dbo.OutboundHeader WHERE OutboundId = %s", (outbound_id,))
+        for pid in affected:
+            inventory_closing.recalculate(pid)
     flash("已刪除出庫單", "success")
     return redirect(url_for("outbound.list_view"))
 

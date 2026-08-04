@@ -109,9 +109,53 @@ etc.) are a defense-in-depth fallback the app also catches.
 Header + line-item saves happen inside `db.transaction()`: on update, all
 existing detail rows for that document are deleted and the current grid
 state is re-inserted — simplest correct approach for a small line grid,
-avoids diffing added/changed/removed rows. `Product.StockBalance` is
-**not** auto-adjusted by inbound/outbound saves — out of scope per the
-assignment spec, not an oversight.
+avoids diffing added/changed/removed rows.
+
+## Daily closing balance (dbo.InventoryDailyClosing) and StockBalance sync
+
+`inventory_closing.recalculate(product_id)` is called for every
+`ProductId` touched by an inbound/outbound create/edit/delete, **inside
+the same `db.transaction()` block** as the header/detail save (so a
+closing-table failure rolls back the whole save).
+
+**Users often enter documents out of date order** (a backdated document
+can be saved after later-dated ones already exist). `recalculate()`
+handles this by never doing an incremental patch — it always fully rebuilds
+that one product's whole daily-closing history in calendar-date order:
+
+1. Sum inbound/outbound quantities per calendar day for that product (both
+   sides, always — the closing balance depends on both regardless of which
+   blueprint triggered the call).
+2. Delete all existing `InventoryDailyClosing` rows for that product.
+3. If it has no transactions left, stop after setting `StockBalance = 0`
+   (this branch only happens when a save/delete just removed a product's
+   *last* transaction — `recalculate()` is never called for a product
+   with no history at all, since such a product is never in a
+   document's affected-products set to begin with).
+4. Otherwise walk day-by-day from its first activity date through
+   **today**, `opening = previous day's closing` (0 on day one),
+   `closing = opening + inbound - outbound`, inserting one row per day
+   (including zero-movement days, carried forward) — this is what makes
+   entry order irrelevant, since the rebuild always replays in date order
+   regardless of the order documents were saved in.
+5. `Product.StockBalance` is set to the final day's `ClosingQuantity`.
+
+**Behavior worth knowing (not a bug)**: since the rebuild always starts
+from an opening balance of 0 on a product's first-ever activity date, a
+manually-typed `StockBalance` on the Product form only holds until that
+product's *first* inbound/outbound is saved — after that, `StockBalance`
+is fully derived from recorded movements.
+
+This recompute is **event-driven** (triggered by inbound/outbound saves),
+not a nightly batch job — per the spec ("when inbound/outbound changes,
+update this table"). There's no scheduled job advancing "today" on its
+own, so a product's last row only reflects the real current date once
+something touches one of its documents again.
+
+The 日結餘額表 report screen (`reports.closing_view`/`closing_export`,
+`templates/reports/closing.html`) queries this table directly, joined to
+`Product` for the name, filterable by product/date range, exportable to
+Excel — same query+export shape as the other two report screens.
 
 ## GitHub
 
