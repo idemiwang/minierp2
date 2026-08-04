@@ -1,17 +1,190 @@
-.sidebar .nav-link {
-    color: #333;
-    border-radius: 4px;
+/* ===== Macaron pastel theme — light only, no dark mode ===== */
+:root {
+    --macaron-pink: #FADCE0;
+    --macaron-pink-dark: #F4A9BB;
+    --macaron-lavender: #E7DBF7;
+    --macaron-lavender-dark: #C9AEEA;
+    --macaron-mint: #D8F3E4;
+    --macaron-mint-dark: #A6E2C3;
+    --macaron-peach: #FFE7CE;
+    --macaron-peach-dark: #FFC998;
+    --macaron-blue: #D9EEFB;
+    --macaron-blue-dark: #AFDCF3;
+    --macaron-cream: #FFFAF3;
+    --text-brown: #6B4B4F;
+    --text-brown-soft: #8A6B6F;
 }
 
-.sidebar .nav-link:hover {
-    background-color: #e9ecef;
+* {
+    font-family: 'Baloo 2', 'Noto Sans TC', sans-serif;
 }
 
-.sidebar .nav-link.active {
-    background-color: #0d6efd;
+body {
+    background: linear-gradient(180deg, var(--macaron-cream) 0%, #FFF3F6 100%);
+    color: var(--text-brown);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-brown);
+    font-weight: 700;
+}
+
+/* ---------- top navbar ---------- */
+.navbar-cute {
+    background: linear-gradient(90deg, var(--macaron-pink) 0%, var(--macaron-lavender) 100%);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.navbar-cute .navbar-brand,
+.navbar-cute span {
+    color: var(--text-brown) !important;
+    font-weight: 700;
+}
+
+.navbar-cute .btn-outline-light {
+    color: var(--text-brown);
+    border-color: var(--text-brown-soft);
+}
+
+.navbar-cute .btn-outline-light:hover {
+    background-color: var(--text-brown-soft);
     color: #fff;
 }
 
-table.table-doc th {
-    background-color: #f1f3f5;
+/* ---------- sidebar ---------- */
+.sidebar {
+    background: linear-gradient(180deg, #FFFDFB 0%, var(--macaron-cream) 100%) !important;
+}
+
+.sidebar .nav-link {
+    color: var(--text-brown-soft);
+    border-radius: 999px;
+    margin: 2px 4px;
+    transition: transform 0.15s ease, background-color 0.15s ease;
+}
+
+.sidebar .nav-link:hover {
+    background-color: var(--macaron-blue);
+    transform: translateX(2px);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--macaron-pink-dark);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(244, 169, 187, 0.6);
+}
+
+/* ---------- buttons ---------- */
+.btn {
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background-color: var(--macaron-pink-dark);
+    border-color: var(--macaron-pink-dark);
+    color: var(--text-brown);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--macaron-pink);
+    border-color: var(--macaron-pink-dark);
+    color: var(--text-brown);
+}
+
+.btn-outline-secondary {
+    color: var(--text-brown-soft);
+    border-color: var(--macaron-lavender-dark);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--macaron-lavender);
+    border-color: var(--macaron-lavender-dark);
+    color: var(--text-brown);
+}
+
+.btn-outline-success {
+    color: #4d9a72;
+    border-color: var(--macaron-mint-dark);
+}
+
+.btn-outline-success:hover {
+    background-color: var(--macaron-mint);
+    border-color: var(--macaron-mint-dark);
+    color: #2f6b4d;
+}
+
+.btn-outline-danger {
+    color: #d97a92;
+    border-color: #f3c2cf;
+}
+
+.btn-outline-danger:hover {
+    background-color: var(--macaron-pink);
+    border-color: var(--macaron-pink-dark);
+    color: #a94a63;
+}
+
+/* ---------- cards / tables / forms ---------- */
+.card {
+    border: none;
+    border-radius: 20px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.table {
+    background-color: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.table thead th, table.table-doc th {
+    background-color: var(--macaron-lavender);
+    color: var(--text-brown);
+    border-bottom: none;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: #FFF6F8;
+}
+
+.form-control, .form-select {
+    border-radius: 12px;
+    border-color: var(--macaron-lavender-dark);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--macaron-pink-dark);
+    box-shadow: 0 0 0 0.2rem rgba(244, 169, 187, 0.25);
+}
+
+/* ---------- alerts ---------- */
+.alert-success {
+    background-color: var(--macaron-mint);
+    border-color: var(--macaron-mint-dark);
+    color: #2f6b4d;
+}
+
+.alert-danger {
+    background-color: var(--macaron-pink);
+    border-color: var(--macaron-pink-dark);
+    color: #a94a63;
+}
+
+/* ---------- cute decorations ---------- */
+.cute-emoji {
+    font-size: 1.1em;
+    margin-right: 4px;
+}
+
+.cute-footer-note {
+    margin-top: 2rem;
+    text-align: center;
+    color: var(--text-brown-soft);
+    font-size: 0.9rem;
+}
+
+.login-card {
+    border-radius: 24px !important;
+    background: linear-gradient(160deg, #fff 0%, var(--macaron-blue) 120%);
 }

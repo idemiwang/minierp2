@@ -7,25 +7,25 @@ from blueprints import product, employee, inbound, outbound, reports
 
 MENU = [
     {
-        "title": "主數據",
+        "title": "🧸 主數據",
         "links": [
-            {"title": "物料管理", "endpoint": "product.list_view"},
-            {"title": "員工管理", "endpoint": "employee.list_view"},
+            {"title": "🐻 物料管理", "endpoint": "product.list_view"},
+            {"title": "🎀 員工管理", "endpoint": "employee.list_view"},
         ],
     },
     {
-        "title": "交易數據",
+        "title": "📦 交易數據",
         "links": [
-            {"title": "入庫管理", "endpoint": "inbound.list_view"},
-            {"title": "出庫管理", "endpoint": "outbound.list_view"},
+            {"title": "🚚 入庫管理", "endpoint": "inbound.list_view"},
+            {"title": "🚛 出庫管理", "endpoint": "outbound.list_view"},
         ],
     },
     {
-        "title": "報表查詢",
+        "title": "🍡 報表查詢",
         "links": [
-            {"title": "入出單據", "endpoint": "reports.header_view"},
-            {"title": "入出明細", "endpoint": "reports.detail_view"},
-            {"title": "日結餘額表", "endpoint": "reports.closing_view"},
+            {"title": "📋 入出單據", "endpoint": "reports.header_view"},
+            {"title": "📝 入出明細", "endpoint": "reports.detail_view"},
+            {"title": "🌸 日結餘額表", "endpoint": "reports.closing_view"},
         ],
     },
 ]
