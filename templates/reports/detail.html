@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}入出明細 - MiniERP{% endblock %}
+{% block content %}
+<h3>入出明細查詢(v_inoutdetail)</h3>
+<form method="get" class="row g-2 mb-3 align-items-end" style="max-width: 640px;">
+  <div class="col-auto">
+    <label class="form-label">物料</label>
+    <select name="product_id" class="form-select">
+      <option value="">全部</option>
+      {% for p in products %}
+      <option value="{{ p.ProductId }}" {% if p.ProductId == filters.product_id %}selected{% endif %}>{{ p.ProductId }} - {{ p.ProductName }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">查詢</button>
+    <a href="{{ url_for('reports.detail_export', **filters) }}" class="btn btn-outline-success">匯出 Excel</a>
+  </div>
+</form>
+<p class="text-muted small">v_inoutdetail 由入庫明細與出庫明細 UNION ALL 而成,單據編號欄位沿用入庫明細的 InboundId 命名。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>單據編號</th><th>行號</th><th>物料編號</th><th>物料名稱</th><th>數量</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr><td>{{ r.InboundId }}</td><td>{{ r.LineNum }}</td><td>{{ r.ProductId }}</td><td>{{ r.ProductName }}</td><td>{{ r.Quantity }}</td></tr>
+    {% else %}
+    <tr><td colspan="5" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

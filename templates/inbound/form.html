@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ '編輯入庫單' if header else '新增入庫單' }} - MiniERP{% endblock %}
+{% block content %}
+<h3>{{ '編輯入庫單 ' + header.InboundId if header else '新增入庫單' }}</h3>
+<form method="post" class="mt-3">
+  <div class="row mb-3" style="max-width: 640px;">
+    <div class="col">
+      <label class="form-label">入庫日期</label>
+      <input type="date" name="inbound_date" class="form-control" value="{{ form_values.inbound_date }}" required>
+    </div>
+    <div class="col">
+      <label class="form-label">經手員工</label>
+      <select name="employee_id" class="form-select" required>
+        <option value="">請選擇</option>
+        {% for e in employees %}
+        <option value="{{ e.EmployeeId }}" {% if e.EmployeeId == form_values.employee_id %}selected{% endif %}>{{ e.EmployeeId }} - {{ e.EmployeeName }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <h5>明細</h5>
+  <table class="table table-sm" id="line-table">
+    <thead><tr><th style="width: 45%;">物料</th><th style="width: 25%;">數量</th><th></th></tr></thead>
+    <tbody id="line-body">
+      {% for line in lines %}
+      <tr>
+        <td>
+          <select name="product_id[]" class="form-select" required>
+            <option value="">請選擇</option>
+            {% for p in products %}
+            <option value="{{ p.ProductId }}" {% if p.ProductId == line.ProductId %}selected{% endif %}>{{ p.ProductId }} - {{ p.ProductName }}</option>
+            {% endfor %}
+          </select>
+        </td>
+        <td><input type="number" step="0.001" min="0.001" name="quantity[]" class="form-control" value="{{ line.Quantity }}" required></td>
+        <td><button type="button" class="btn btn-sm btn-outline-danger remove-line">移除</button></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <button type="button" id="add-line" class="btn btn-sm btn-outline-primary mb-3">+ 新增一行</button>
+  <br>
+  <button type="submit" class="btn btn-primary">儲存</button>
+  <a href="{{ url_for('inbound.list_view') }}" class="btn btn-outline-secondary">取消</a>
+</form>
+
+<template id="line-template">
+  <tr>
+    <td>
+      <select name="product_id[]" class="form-select" required>
+        <option value="">請選擇</option>
+        {% for p in products %}
+        <option value="{{ p.ProductId }}">{{ p.ProductId }} - {{ p.ProductName }}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input type="number" step="0.001" min="0.001" name="quantity[]" class="form-control" required></td>
+    <td><button type="button" class="btn btn-sm btn-outline-danger remove-line">移除</button></td>
+  </tr>
+</template>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('add-line').addEventListener('click', function () {
+  const tpl = document.getElementById('line-template');
+  const clone = tpl.content.cloneNode(true);
+  document.getElementById('line-body').appendChild(clone);
+});
+document.getElementById('line-body').addEventListener('click', function (e) {
+  if (e.target.classList.contains('remove-line')) {
+    e.target.closest('tr').remove();
+  }
+});
+if (document.getElementById('line-body').children.length === 0) {
+  document.getElementById('add-line').click();
+}
+</script>
+{% endblock %}

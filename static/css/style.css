@@ -1,0 +1,17 @@
+.sidebar .nav-link {
+    color: #333;
+    border-radius: 4px;
+}
+
+.sidebar .nav-link:hover {
+    background-color: #e9ecef;
+}
+
+.sidebar .nav-link.active {
+    background-color: #0d6efd;
+    color: #fff;
+}
+
+table.table-doc th {
+    background-color: #f1f3f5;
+}

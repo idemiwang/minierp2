@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}入庫單明細 - MiniERP{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>入庫單 {{ header.InboundId }}</h3>
+  <div>
+    <a href="{{ url_for('inbound.edit_view', inbound_id=header.InboundId) }}" class="btn btn-outline-secondary btn-sm">編輯</a>
+    <a href="{{ url_for('inbound.export_view', inbound_id=header.InboundId) }}" class="btn btn-outline-success btn-sm">匯出 Excel</a>
+    <a href="{{ url_for('inbound.list_view') }}" class="btn btn-outline-secondary btn-sm">返回列表</a>
+  </div>
+</div>
+<p>日期:{{ header.InboundDate }}<br>經手員工:{{ header.EmployeeId }} - {{ header.EmployeeName }}</p>
+<table class="table table-sm table-striped table-doc">
+  <thead><tr><th>行號</th><th>物料編號</th><th>物料名稱</th><th>數量</th></tr></thead>
+  <tbody>
+    {% for l in lines %}
+    <tr><td>{{ l.LineNum }}</td><td>{{ l.ProductId }}</td><td>{{ l.ProductName }}</td><td>{{ l.Quantity }}</td></tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無明細</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

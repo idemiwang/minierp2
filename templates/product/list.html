@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}物料管理 - MiniERP{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>物料管理</h3>
+  <a href="{{ url_for('product.create_view') }}" class="btn btn-primary">+ 新增物料</a>
+</div>
+<table class="table table-striped table-hover">
+  <thead><tr><th>物料編號</th><th>物料名稱</th><th>庫存餘額</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for p in products %}
+    <tr>
+      <td><a href="{{ url_for('product.detail_view', product_id=p.ProductId) }}">{{ p.ProductId }}</a></td>
+      <td>{{ p.ProductName }}</td>
+      <td>{{ p.StockBalance }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('product.edit_view', product_id=p.ProductId) }}" class="btn btn-sm btn-outline-secondary">編輯</a>
+        <form action="{{ url_for('product.delete_view', product_id=p.ProductId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要刪除物料 {{ p.ProductId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

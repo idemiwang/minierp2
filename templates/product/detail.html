@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}物料明細 - MiniERP{% endblock %}
+{% block content %}
+<h3>物料明細 - {{ product.ProductId }} {{ product.ProductName }}</h3>
+<p>庫存餘額:{{ product.StockBalance }}</p>
+<a href="{{ url_for('product.list_view') }}" class="btn btn-outline-secondary btn-sm mb-3">返回列表</a>
+
+<h5>入出庫明細(v_inoutdetail,唯讀)</h5>
+<p class="text-muted small">此檢視表由入庫明細與出庫明細 UNION ALL 而成,第一欄位沿用入庫明細的 InboundId 命名,出庫來源的資料也會顯示在此欄位下。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>單據編號</th><th>行號</th><th>物料編號</th><th>物料名稱</th><th>數量</th></tr></thead>
+  <tbody>
+    {% for d in details %}
+    <tr>
+      <td>{{ d.InboundId }}</td>
+      <td>{{ d.LineNum }}</td>
+      <td>{{ d.ProductId }}</td>
+      <td>{{ d.ProductName }}</td>
+      <td>{{ d.Quantity }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="text-center text-muted">尚無入出庫紀錄</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

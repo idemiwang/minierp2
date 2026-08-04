@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}員工明細 - MiniERP{% endblock %}
+{% block content %}
+<h3>員工明細 - {{ employee.EmployeeId }} {{ employee.EmployeeName }}</h3>
+<p>Email:{{ employee.Email or '(未填寫)' }}</p>
+<a href="{{ url_for('employee.list_view') }}" class="btn btn-outline-secondary btn-sm mb-3">返回列表</a>
+
+<h5>入出庫單據(v_inoutheader,唯讀)</h5>
+<p class="text-muted small">此檢視表由入庫單頭與出庫單頭 UNION ALL 而成,第一欄位沿用入庫單頭的 InboundId/InboundDate 命名,出庫來源的資料也會顯示在此欄位下。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>單據編號</th><th>日期</th><th>員工編號</th></tr></thead>
+  <tbody>
+    {% for h in headers %}
+    <tr>
+      <td>{{ h.InboundId }}</td>
+      <td>{{ h.InboundDate }}</td>
+      <td>{{ h.EmployeeId }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="text-center text-muted">尚無入出庫紀錄</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

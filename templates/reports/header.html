@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}入出單據 - MiniERP{% endblock %}
+{% block content %}
+<h3>入出單據查詢(v_inoutheader)</h3>
+<form method="get" class="row g-2 mb-3 align-items-end" style="max-width: 760px;">
+  <div class="col-auto">
+    <label class="form-label">日期起</label>
+    <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">日期迄</label>
+    <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">員工</label>
+    <select name="employee_id" class="form-select">
+      <option value="">全部</option>
+      {% for e in employees %}
+      <option value="{{ e.EmployeeId }}" {% if e.EmployeeId == filters.employee_id %}selected{% endif %}>{{ e.EmployeeId }} - {{ e.EmployeeName }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">查詢</button>
+    <a href="{{ url_for('reports.header_export', **filters) }}" class="btn btn-outline-success">匯出 Excel</a>
+  </div>
+</form>
+<p class="text-muted small">v_inoutheader 由入庫單頭與出庫單頭 UNION ALL 而成,單據編號欄位沿用入庫單頭的 InboundId 命名。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>單據編號</th><th>日期</th><th>員工編號</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr><td>{{ r.InboundId }}</td><td>{{ r.InboundDate }}</td><td>{{ r.EmployeeId }}</td></tr>
+    {% else %}
+    <tr><td colspan="3" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

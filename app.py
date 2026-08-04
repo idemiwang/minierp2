@@ -1,0 +1,61 @@
+from flask import Flask, redirect, url_for
+
+import auth
+import db
+from config import Config
+from blueprints import product, employee, inbound, outbound, reports
+
+MENU = [
+    {
+        "title": "主數據",
+        "links": [
+            {"title": "物料管理", "endpoint": "product.list_view"},
+            {"title": "員工管理", "endpoint": "employee.list_view"},
+        ],
+    },
+    {
+        "title": "交易數據",
+        "links": [
+            {"title": "入庫管理", "endpoint": "inbound.list_view"},
+            {"title": "出庫管理", "endpoint": "outbound.list_view"},
+        ],
+    },
+    {
+        "title": "報表查詢",
+        "links": [
+            {"title": "入出單據", "endpoint": "reports.header_view"},
+            {"title": "入出明細", "endpoint": "reports.detail_view"},
+        ],
+    },
+]
+
+
+def create_app():
+    app = Flask(__name__)
+    app.config["SECRET_KEY"] = Config.SECRET_KEY
+
+    app.teardown_appcontext(db.close_connection)
+    app.before_request(auth.enforce_login)
+
+    app.register_blueprint(auth.bp)
+    app.register_blueprint(product.bp, url_prefix="/products")
+    app.register_blueprint(employee.bp, url_prefix="/employees")
+    app.register_blueprint(inbound.bp, url_prefix="/inbound")
+    app.register_blueprint(outbound.bp, url_prefix="/outbound")
+    app.register_blueprint(reports.bp, url_prefix="/reports")
+
+    @app.context_processor
+    def inject_menu():
+        return {"menu": MENU}
+
+    @app.route("/")
+    def dashboard():
+        return redirect(url_for("product.list_view"))
+
+    return app
+
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run(debug=True, port=5050)

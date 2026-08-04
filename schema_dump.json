@@ -1,0 +1,500 @@
+{
+  "tables": [
+    {
+      "schema_name": "dbo",
+      "table_name": "__SchemaMigrations",
+      "object_id": 901578250
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "object_id": 949578421
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "object_id": 1125579048
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "object_id": 1029578706
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "object_id": 1189579276
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "object_id": 1077578877
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "object_id": 981578535
+    }
+  ],
+  "columns": [
+    {
+      "schema_name": "dbo",
+      "table_name": "__SchemaMigrations",
+      "column_id": 1,
+      "column_name": "Filename",
+      "data_type": "nvarchar",
+      "max_length": 510,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "__SchemaMigrations",
+      "column_id": 2,
+      "column_name": "AppliedAt",
+      "data_type": "datetime2",
+      "max_length": 8,
+      "precision": 27,
+      "scale": 7,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "column_id": 1,
+      "column_name": "EmployeeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "column_id": 2,
+      "column_name": "EmployeeName",
+      "data_type": "nvarchar",
+      "max_length": 200,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "column_id": 3,
+      "column_name": "Email",
+      "data_type": "nvarchar",
+      "max_length": 510,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_id": 1,
+      "column_name": "InboundId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_id": 2,
+      "column_name": "LineNum",
+      "data_type": "smallint",
+      "max_length": 2,
+      "precision": 5,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_id": 3,
+      "column_name": "ProductId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_id": 4,
+      "column_name": "ProductName",
+      "data_type": "nvarchar",
+      "max_length": 400,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_id": 5,
+      "column_name": "Quantity",
+      "data_type": "decimal",
+      "max_length": 9,
+      "precision": 18,
+      "scale": 3,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 1,
+      "column_name": "InboundId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 2,
+      "column_name": "InboundDate",
+      "data_type": "date",
+      "max_length": 3,
+      "precision": 10,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 3,
+      "column_name": "EmployeeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_id": 1,
+      "column_name": "OutboundId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_id": 2,
+      "column_name": "LineNum",
+      "data_type": "smallint",
+      "max_length": 2,
+      "precision": 5,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_id": 3,
+      "column_name": "ProductId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_id": 4,
+      "column_name": "ProductName",
+      "data_type": "nvarchar",
+      "max_length": 400,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_id": 5,
+      "column_name": "Quantity",
+      "data_type": "decimal",
+      "max_length": 9,
+      "precision": 18,
+      "scale": 3,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 1,
+      "column_name": "OutboundId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 2,
+      "column_name": "OutboundDate",
+      "data_type": "date",
+      "max_length": 3,
+      "precision": 10,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 3,
+      "column_name": "EmployeeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "column_id": 1,
+      "column_name": "ProductId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "column_id": 2,
+      "column_name": "ProductName",
+      "data_type": "nvarchar",
+      "max_length": 400,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "column_id": 3,
+      "column_name": "StockBalance",
+      "data_type": "decimal",
+      "max_length": 9,
+      "precision": 18,
+      "scale": 3,
+      "is_nullable": false,
+      "is_identity": false
+    }
+  ],
+  "primary_keys": [
+    {
+      "schema_name": "dbo",
+      "table_name": "__SchemaMigrations",
+      "column_name": "Filename",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "column_name": "EmployeeId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_name": "InboundId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "column_name": "LineNum",
+      "key_ordinal": 2
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_name": "InboundId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_name": "OutboundId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "column_name": "LineNum",
+      "key_ordinal": 2
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_name": "OutboundId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "column_name": "ProductId",
+      "key_ordinal": 1
+    }
+  ],
+  "foreign_keys": [
+    {
+      "fk_name": "FK_InboundDetail_InboundHeader",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundDetail",
+      "parent_column": "InboundId",
+      "ref_schema": "dbo",
+      "ref_table": "InboundHeader",
+      "ref_column": "InboundId"
+    },
+    {
+      "fk_name": "FK_InboundDetail_Product",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundDetail",
+      "parent_column": "ProductId",
+      "ref_schema": "dbo",
+      "ref_table": "Product",
+      "ref_column": "ProductId"
+    },
+    {
+      "fk_name": "FK_InboundHeader_Employee",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundHeader",
+      "parent_column": "EmployeeId",
+      "ref_schema": "dbo",
+      "ref_table": "Employee",
+      "ref_column": "EmployeeId"
+    },
+    {
+      "fk_name": "FK_OutboundDetail_OutboundHeader",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundDetail",
+      "parent_column": "OutboundId",
+      "ref_schema": "dbo",
+      "ref_table": "OutboundHeader",
+      "ref_column": "OutboundId"
+    },
+    {
+      "fk_name": "FK_OutboundDetail_Product",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundDetail",
+      "parent_column": "ProductId",
+      "ref_schema": "dbo",
+      "ref_table": "Product",
+      "ref_column": "ProductId"
+    },
+    {
+      "fk_name": "FK_OutboundHeader_Employee",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundHeader",
+      "parent_column": "EmployeeId",
+      "ref_schema": "dbo",
+      "ref_table": "Employee",
+      "ref_column": "EmployeeId"
+    }
+  ],
+  "views": [
+    {
+      "view_name": "v_inoutheader",
+      "definition": "/* v_inoutheader / v_inoutdetail — exactly the UNION ALL the spec calls for.\n   Note: InboundHeader's PK column is named InboundId, OutboundHeader's is\n   OutboundId; UNION ALL matches columns positionally, so the view exposes\n   both under the first query's column name (InboundId / InboundId-less\n   detail equivalents). The app treats that column as a generic transaction\n   id — see reports blueprint. */\n\nCREATE VIEW dbo.v_inoutheader AS\nSELECT * FROM dbo.InboundHeader\nUNION ALL\nSELECT * FROM dbo.OutboundHeader;"
+    },
+    {
+      "view_name": "v_inoutdetail",
+      "definition": "CREATE VIEW dbo.v_inoutdetail AS\nSELECT * FROM dbo.InboundDetail\nUNION ALL\nSELECT * FROM dbo.OutboundDetail;"
+    }
+  ],
+  "row_counts": [
+    {
+      "schema_name": "dbo",
+      "table_name": "__SchemaMigrations",
+      "row_count": 2
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Employee",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundDetail",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundDetail",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Product",
+      "row_count": 0
+    }
+  ]
+}

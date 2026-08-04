@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}入庫管理 - MiniERP{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>入庫管理</h3>
+  <a href="{{ url_for('inbound.create_view') }}" class="btn btn-primary">+ 新增入庫單</a>
+</div>
+<table class="table table-striped table-hover">
+  <thead><tr><th>入庫單號</th><th>日期</th><th>經手員工</th><th>行數</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for h in headers %}
+    <tr>
+      <td><a href="{{ url_for('inbound.detail_view', inbound_id=h.InboundId) }}">{{ h.InboundId }}</a></td>
+      <td>{{ h.InboundDate }}</td>
+      <td>{{ h.EmployeeName }}</td>
+      <td>{{ h.LineCount }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('inbound.edit_view', inbound_id=h.InboundId) }}" class="btn btn-sm btn-outline-secondary">編輯</a>
+        <a href="{{ url_for('inbound.export_view', inbound_id=h.InboundId) }}" class="btn btn-sm btn-outline-success">匯出</a>
+        <form action="{{ url_for('inbound.delete_view', inbound_id=h.InboundId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要刪除入庫單 {{ h.InboundId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
