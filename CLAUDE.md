@@ -132,13 +132,18 @@ that one product's whole daily-closing history in calendar-date order:
    *last* transaction — `recalculate()` is never called for a product
    with no history at all, since such a product is never in a
    document's affected-products set to begin with).
-4. Otherwise walk day-by-day from its first activity date through
-   **today**, `opening = previous day's closing` (0 on day one),
-   `closing = opening + inbound - outbound`, inserting one row per day
-   (including zero-movement days, carried forward) — this is what makes
-   entry order irrelevant, since the rebuild always replays in date order
-   regardless of the order documents were saved in.
-5. `Product.StockBalance` is set to the final day's `ClosingQuantity`.
+4. Otherwise sort the distinct dates that actually have inbound/outbound
+   movement (ascending) and walk through *only those* — no row for a
+   no-movement day, no "carry forward to today" (changed from an earlier
+   every-calendar-day design per user feedback: too many rows, only
+   movement days matter). `opening = previous *recorded* day's closing`
+   (0 on the first recorded day), `closing = opening + inbound - outbound`,
+   one row per movement date. This still makes entry order irrelevant —
+   the rebuild always replays in date order regardless of the order
+   documents were saved in — it just skips emitting a row for days with
+   nothing to record.
+5. `Product.StockBalance` is set to the last recorded day's
+   `ClosingQuantity`.
 
 **Behavior worth knowing (not a bug)**: since the rebuild always starts
 from an opening balance of 0 on a product's first-ever activity date, a
@@ -148,9 +153,7 @@ is fully derived from recorded movements.
 
 This recompute is **event-driven** (triggered by inbound/outbound saves),
 not a nightly batch job — per the spec ("when inbound/outbound changes,
-update this table"). There's no scheduled job advancing "today" on its
-own, so a product's last row only reflects the real current date once
-something touches one of its documents again.
+update this table").
 
 The 日結餘額表 report screen (`reports.closing_view`/`closing_export`,
 `templates/reports/closing.html`) queries this table directly, joined to
