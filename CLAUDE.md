@@ -97,13 +97,20 @@ Generate `APP_PASSWORD_HASH`:
 `hashlib.scrypt`, which is werkzeug's newer default and raises
 `AttributeError` if omitted.)
 
-## Login
+## Login and roles
 
-Single-account session login (no user-management system, per project
-scope) — username/password-hash come from `.env` (`APP_USERNAME`,
-`APP_PASSWORD_HASH`), checked in `auth.py`. `app.before_request` blocks
-every route except `/login` and static assets until `session["user"]` is
-set.
+Two shared role accounts (not one per real Employee) — `EMPLOYEE_USERNAME`/
+`EMPLOYEE_PASSWORD_HASH` and `MANAGER_USERNAME`/`MANAGER_PASSWORD_HASH` in
+`.env`, checked in `auth.py`'s `ROLE_ACCOUNTS`. Login sets both
+`session["user"]` (display/audit name) and `session["role"]`
+(`"employee"`/`"manager"`). `app.before_request` blocks every route except
+`/login` and static assets until `session["user"]` is set (unchanged).
+`auth.manager_required` is a second decorator for routes only a manager
+may hit (currently just outbound approve/reject) — checked server-side,
+never just by hiding a button in the template. The navbar
+(`templates/base.html`) shows a different fun title per role by reading
+`session.get('role')` directly in Jinja (`session` is already a Jinja
+global, no extra context processor needed).
 
 ## ID generation
 
@@ -236,6 +243,54 @@ backfilled cleanly): `SafetyStock` (安全庫存) and `UnitPrice` (單價).
   data). It checks the pre-save balance and doesn't try to net out an
   edit's own prior line — a deliberate approximation, not a precise
   guarantee.
+
+## Outbound approval workflow (manager sign-off)
+
+Outbound (only — Inbound is untouched) now requires manager approval
+before it affects stock, per a real-ERP convention. `OutboundHeader` (and,
+purely to keep `v_inoutheader`'s positional `UNION ALL` valid, the unused
+`InboundHeader` columns too — see migration 006) carries:
+- `Status` (`PENDING` / `APPROVED` / `REJECTED`) — new outbound docs are
+  created `PENDING`; Inbound rows are always backfilled/defaulted to
+  `APPROVED` since that document type never goes through this workflow.
+- `ApprovedBy` (login username) / `ApprovedAt` (timestamp) — set together
+  whenever a manager approves or rejects; both `NULL` while `PENDING`.
+
+**Key design insight**: `inventory_closing.recalculate()` already does a
+full rebuild-from-DB every time it runs, so the *only* change needed was
+adding `AND h.Status = 'APPROVED'` to its outbound query
+(`inventory_closing.py`). That single filter makes every transition —
+create-as-pending, approve, reject, edit-an-approved-doc-back-to-pending,
+delete — "just work" through the exact same `recalculate()` call already
+wired into every outbound save/delete path. There is no special-case
+stock-reversal code anywhere: a doc's stock effect is purely a function of
+whatever `Status` it currently holds at recalculate time.
+
+Editing an outbound document — of any prior status — always resets it to
+`Status='PENDING'` and clears `ApprovedBy`/`ApprovedAt`, requiring
+re-approval; the 經手員工 (`EmployeeId`) dropdown itself stays freely
+editable regardless of role.
+
+Rejected documents are **kept, not deleted** — they're an editable audit
+record (same as any other status, editing one resets it to `PENDING`).
+
+Routes (`blueprints/outbound.py`): `POST /outbound/<id>/approve` and
+`POST /outbound/<id>/reject`, both decorated `@auth.manager_required` (a
+`session.get("role") != "manager"` check that redirects with a flash
+error — enforced server-side regardless of what buttons the UI shows).
+`GET /outbound/pending` lists all `PENDING` docs; visible to everyone for
+transparency, but the Approve/Reject buttons only render for
+`session.get('role') == 'manager'` in `templates/outbound/pending.html`
+and `templates/outbound/detail.html`.
+
+Any report/dashboard query computing a "sales value" from
+`OutboundDetail.Quantity * Product.UnitPrice` (員工業績, 客戶排行,
+dashboard 本月/本年業績, dashboard 熱銷排行) filters to
+`Status = 'APPROVED'` — a pending or rejected order isn't a real sale yet.
+The raw 入出單據 union report (`v_inoutheader`) is **not** filtered at the
+query level (kept as a literal spec-mandated union), but does show a
+Status column for visibility. 日結餘額表 needed no changes since it's
+already correct via the filtered `recalculate()`.
 
 ## Dashboard (首頁) and 年度分析
 

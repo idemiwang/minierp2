@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}待審核出庫單 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>🗂️ 待審核出庫單</h3>
+<p class="text-muted small">出庫單建立後狀態是「待審核」,不會影響庫存;主管核准後才會正式扣庫存。</p>
+<table class="table table-striped table-hover">
+  <thead><tr><th>出庫單號</th><th>日期</th><th>經手員工</th><th>倉別</th><th>單別</th><th>客戶</th><th>行數</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for h in headers %}
+    <tr>
+      <td><a href="{{ url_for('outbound.detail_view', outbound_id=h.OutboundId) }}">{{ h.OutboundId }}</a></td>
+      <td>{{ h.OutboundDate }}</td>
+      <td>{{ h.EmployeeName }}</td>
+      <td>{{ h.WarehouseName }}</td>
+      <td>{{ h.DocTypeName }}</td>
+      <td>{{ h.CustomerName or '' }}</td>
+      <td>{{ h.LineCount }}</td>
+      <td class="text-end">
+        {% if session.get('role') == 'manager' %}
+        <form action="{{ url_for('outbound.approve_view', outbound_id=h.OutboundId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要核准出庫單 {{ h.OutboundId }} 嗎?核准後會正式扣庫存。');">
+          <button type="submit" class="btn btn-sm btn-outline-success">✅ 核准</button>
+        </form>
+        <form action="{{ url_for('outbound.reject_view', outbound_id=h.OutboundId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要拒絕出庫單 {{ h.OutboundId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">❌ 拒絕</button>
+        </form>
+        {% else %}
+        <span class="text-muted small">需主管權限</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="8" class="text-center text-muted">🎉 目前沒有待審核的出庫單</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

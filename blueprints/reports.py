@@ -86,7 +86,8 @@ def header_export():
     rows = _header_rows(filters)
     buf = export_table(
         title="入出單據查詢結果",
-        columns=[("單據編號", "InboundId"), ("日期", "InboundDate"), ("員工編號", "EmployeeId")],
+        columns=[("單據編號", "InboundId"), ("日期", "InboundDate"), ("員工編號", "EmployeeId"),
+                  ("狀態", "Status")],
         rows=rows,
     )
     return send_file(buf, as_attachment=True, download_name="inout_header.xlsx",
@@ -258,7 +259,7 @@ def _employee_performance_rows(args):
         SELECT e.EmployeeId, e.EmployeeName,
                ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS TotalSales
         FROM dbo.Employee e
-        LEFT JOIN dbo.OutboundHeader oh ON oh.EmployeeId = e.EmployeeId {date_clause}
+        LEFT JOIN dbo.OutboundHeader oh ON oh.EmployeeId = e.EmployeeId AND oh.Status = 'APPROVED' {date_clause}
         LEFT JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
         LEFT JOIN dbo.Product p ON p.ProductId = od.ProductId
         GROUP BY e.EmployeeId, e.EmployeeName
@@ -304,7 +305,7 @@ def _customer_ranking_rows(args):
         SELECT c.CustomerId, c.CustomerName,
                ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS TotalPurchase
         FROM dbo.Customer c
-        LEFT JOIN dbo.OutboundHeader oh ON oh.CustomerId = c.CustomerId {date_clause}
+        LEFT JOIN dbo.OutboundHeader oh ON oh.CustomerId = c.CustomerId AND oh.Status = 'APPROVED' {date_clause}
         LEFT JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
         LEFT JOIN dbo.Product p ON p.ProductId = od.ProductId
         GROUP BY c.CustomerId, c.CustomerName
@@ -345,6 +346,7 @@ def annual_view():
         FROM dbo.OutboundHeader oh
         JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
         JOIN dbo.Product p ON p.ProductId = od.ProductId
+        WHERE oh.Status = 'APPROVED'
         GROUP BY YEAR(oh.OutboundDate)
         ORDER BY Yr
     """)
@@ -364,7 +366,7 @@ def annual_view():
         FROM dbo.OutboundHeader oh
         JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
         JOIN dbo.Product p ON p.ProductId = od.ProductId
-        WHERE YEAR(oh.OutboundDate) = %s
+        WHERE YEAR(oh.OutboundDate) = %s AND oh.Status = 'APPROVED'
         GROUP BY MONTH(oh.OutboundDate)
     """, (selected_year,))
     monthly_map = {r["Mo"]: float(r["Total"]) for r in monthly_rows}

@@ -13,7 +13,7 @@ def _sales_total(date_from, date_to):
         FROM dbo.OutboundHeader oh
         JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
         JOIN dbo.Product p ON p.ProductId = od.ProductId
-        WHERE oh.OutboundDate >= %s AND oh.OutboundDate <= %s
+        WHERE oh.OutboundDate >= %s AND oh.OutboundDate <= %s AND oh.Status = 'APPROVED'
     """, (date_from, date_to))
     return row["Total"]
 
@@ -41,7 +41,9 @@ def index_view():
     top_products = db.query("""
         SELECT TOP 5 p.ProductId, p.ProductName, SUM(od.Quantity) AS TotalQty
         FROM dbo.OutboundDetail od
+        JOIN dbo.OutboundHeader oh ON oh.OutboundId = od.OutboundId
         JOIN dbo.Product p ON p.ProductId = od.ProductId
+        WHERE oh.Status = 'APPROVED'
         GROUP BY p.ProductId, p.ProductName
         ORDER BY TotalQty DESC
     """)

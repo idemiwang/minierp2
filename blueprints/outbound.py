@@ -1,13 +1,16 @@
-from datetime import date
+from datetime import date, datetime
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file
+from flask import Blueprint, render_template, request, redirect, url_for, flash, send_file, session
 
+import auth
 import db
 import id_generator
 import inventory_closing
 from excel.exporters import export_document
 
 bp = Blueprint("outbound", __name__)
+
+STATUS_LABELS = {"PENDING": "🟡 待審核", "APPROVED": "🟢 已核准", "REJECTED": "🔴 已拒絕"}
 
 
 def _products():
@@ -66,7 +69,7 @@ def _stock_shortfall_warnings(lines, warehouse_id):
 def list_view():
     headers = db.query("""
         SELECT h.OutboundId, h.OutboundDate, h.EmployeeId, e.EmployeeName,
-               w.WarehouseName, dt.DocTypeName, c.CustomerName,
+               w.WarehouseName, dt.DocTypeName, c.CustomerName, h.Status,
                (SELECT COUNT(*) FROM dbo.OutboundDetail d WHERE d.OutboundId = h.OutboundId) AS LineCount
         FROM dbo.OutboundHeader h
         JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
@@ -75,7 +78,24 @@ def list_view():
         LEFT JOIN dbo.Customer c ON c.CustomerId = h.CustomerId
         ORDER BY h.OutboundDate DESC, h.OutboundId DESC
     """)
-    return render_template("outbound/list.html", headers=headers)
+    return render_template("outbound/list.html", headers=headers, status_labels=STATUS_LABELS)
+
+
+@bp.route("/pending")
+def pending_view():
+    headers = db.query("""
+        SELECT h.OutboundId, h.OutboundDate, h.EmployeeId, e.EmployeeName,
+               w.WarehouseName, dt.DocTypeName, c.CustomerName,
+               (SELECT COUNT(*) FROM dbo.OutboundDetail d WHERE d.OutboundId = h.OutboundId) AS LineCount
+        FROM dbo.OutboundHeader h
+        JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        LEFT JOIN dbo.Customer c ON c.CustomerId = h.CustomerId
+        WHERE h.Status = 'PENDING'
+        ORDER BY h.OutboundDate, h.OutboundId
+    """)
+    return render_template("outbound/pending.html", headers=headers)
 
 
 @bp.route("/new", methods=["GET", "POST"])
@@ -111,8 +131,8 @@ def create_view():
                 cur = conn.cursor()
                 cur.execute(
                     "INSERT INTO dbo.OutboundHeader "
-                    "(OutboundId, OutboundDate, EmployeeId, WarehouseId, DocTypeId, CustomerId) "
-                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    "(OutboundId, OutboundDate, EmployeeId, WarehouseId, DocTypeId, CustomerId, Status) "
+                    "VALUES (%s, %s, %s, %s, %s, %s, 'PENDING')",
                     (new_id, outbound_date, employee_id, warehouse_id, doctype_id, customer_id),
                 )
                 for line_num, (pid, pname, qty) in enumerate(lines, start=1):
@@ -125,9 +145,9 @@ def create_view():
                     inventory_closing.recalculate(pid, warehouse_id)
 
         new_id = id_generator.generate_with_retry(id_generator.next_outbound_id, insert)
-        flash(f"已新增出庫單 {new_id}", "success")
+        flash(f"已新增出庫單 {new_id},狀態為「待審核」,主管核准後才會影響庫存", "success")
         if stock_warnings:
-            flash("⚠️ 庫存不足,已超賣:" + "、".join(stock_warnings), "warning")
+            flash("⚠️ 核准時若庫存不足會超賣:" + "、".join(stock_warnings), "warning")
         return redirect(url_for("outbound.detail_view", outbound_id=new_id))
 
     return render_template("outbound/form.html", header=None, lines=[],
@@ -176,12 +196,14 @@ def edit_view(outbound_id):
                                     form_values=form_values)
 
         stock_warnings = _stock_shortfall_warnings(lines, warehouse_id)
+        was_approved = header["Status"] == "APPROVED"
 
         with db.transaction() as conn:
             cur = conn.cursor()
             cur.execute(
                 "UPDATE dbo.OutboundHeader SET OutboundDate = %s, EmployeeId = %s, WarehouseId = %s, "
-                "DocTypeId = %s, CustomerId = %s WHERE OutboundId = %s",
+                "DocTypeId = %s, CustomerId = %s, Status = 'PENDING', ApprovedBy = NULL, ApprovedAt = NULL "
+                "WHERE OutboundId = %s",
                 (outbound_date, employee_id, warehouse_id, doctype_id, customer_id, outbound_id),
             )
             cur.execute("DELETE FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,))
@@ -196,9 +218,12 @@ def edit_view(outbound_id):
             for pid in affected_products:
                 for wid in affected_warehouses:
                     inventory_closing.recalculate(pid, wid)
-        flash("已更新出庫單", "success")
+        if was_approved:
+            flash("已更新出庫單 — 原本已核准,修改後打回「待審核」,庫存已還原,需重新審核", "success")
+        else:
+            flash("已更新出庫單", "success")
         if stock_warnings:
-            flash("⚠️ 庫存不足,已超賣:" + "、".join(stock_warnings), "warning")
+            flash("⚠️ 核准時若庫存不足會超賣:" + "、".join(stock_warnings), "warning")
         return redirect(url_for("outbound.detail_view", outbound_id=outbound_id))
 
     lines = db.query(
@@ -229,6 +254,64 @@ def delete_view(outbound_id):
     return redirect(url_for("outbound.list_view"))
 
 
+@bp.route("/<outbound_id>/approve", methods=["POST"])
+@auth.manager_required
+def approve_view(outbound_id):
+    header = db.query_one("SELECT * FROM dbo.OutboundHeader WHERE OutboundId = %s", (outbound_id,))
+    if not header:
+        flash("找不到該出庫單", "error")
+        return redirect(url_for("outbound.pending_view"))
+
+    lines = db.query(
+        "SELECT ProductId, ProductName, Quantity FROM dbo.OutboundDetail WHERE OutboundId = %s",
+        (outbound_id,),
+    )
+    stock_warnings = _stock_shortfall_warnings(
+        [(r["ProductId"], r["ProductName"], float(r["Quantity"])) for r in lines],
+        header["WarehouseId"],
+    )
+
+    with db.transaction() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE dbo.OutboundHeader SET Status = 'APPROVED', ApprovedBy = %s, ApprovedAt = %s "
+            "WHERE OutboundId = %s",
+            (session["user"], datetime.now(), outbound_id),
+        )
+        for r in lines:
+            inventory_closing.recalculate(r["ProductId"], header["WarehouseId"])
+
+    flash(f"已核准出庫單 {outbound_id},庫存已更新", "success")
+    if stock_warnings:
+        flash("⚠️ 庫存不足,已超賣:" + "、".join(stock_warnings), "warning")
+    return redirect(url_for("outbound.pending_view"))
+
+
+@bp.route("/<outbound_id>/reject", methods=["POST"])
+@auth.manager_required
+def reject_view(outbound_id):
+    header = db.query_one("SELECT WarehouseId FROM dbo.OutboundHeader WHERE OutboundId = %s", (outbound_id,))
+    if not header:
+        flash("找不到該出庫單", "error")
+        return redirect(url_for("outbound.pending_view"))
+
+    affected_products = {r["ProductId"] for r in db.query(
+        "SELECT DISTINCT ProductId FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,)
+    )}
+    with db.transaction() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            "UPDATE dbo.OutboundHeader SET Status = 'REJECTED', ApprovedBy = %s, ApprovedAt = %s "
+            "WHERE OutboundId = %s",
+            (session["user"], datetime.now(), outbound_id),
+        )
+        for pid in affected_products:
+            inventory_closing.recalculate(pid, header["WarehouseId"])
+
+    flash(f"已拒絕出庫單 {outbound_id}(單據保留供之後編輯重新送審)", "success")
+    return redirect(url_for("outbound.pending_view"))
+
+
 @bp.route("/<outbound_id>")
 def detail_view(outbound_id):
     header = db.query_one("""
@@ -246,7 +329,7 @@ def detail_view(outbound_id):
     lines = db.query(
         "SELECT * FROM dbo.OutboundDetail WHERE OutboundId = %s ORDER BY LineNum", (outbound_id,)
     )
-    return render_template("outbound/detail.html", header=header, lines=lines)
+    return render_template("outbound/detail.html", header=header, lines=lines, status_labels=STATUS_LABELS)
 
 
 @bp.route("/<outbound_id>/export")

@@ -27,12 +27,13 @@
 </form>
 <p class="text-muted small">v_inoutheader 由入庫單頭與出庫單頭 UNION ALL 而成,單據編號欄位沿用入庫單頭的 InboundId 命名。</p>
 <table class="table table-sm table-striped">
-  <thead><tr><th>單據編號</th><th>日期</th><th>員工編號</th></tr></thead>
+  <thead><tr><th>單據編號</th><th>日期</th><th>員工編號</th><th>狀態</th></tr></thead>
   <tbody>
     {% for r in rows %}
-    <tr><td>{{ r.InboundId }}</td><td>{{ r.InboundDate }}</td><td>{{ r.EmployeeId }}</td></tr>
+    <tr><td>{{ r.InboundId }}</td><td>{{ r.InboundDate }}</td><td>{{ r.EmployeeId }}</td>
+        <td>{% if r.Status == 'PENDING' %}🟡 待審核{% elif r.Status == 'REJECTED' %}🔴 已拒絕{% else %}🟢 已核准{% endif %}</td></tr>
     {% else %}
-    <tr><td colspan="3" class="text-center text-muted">尚無資料</td></tr>
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
     {% endfor %}
   </tbody>
 </table>

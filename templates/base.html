@@ -14,7 +14,7 @@
   <span class="navbar-brand mb-0 h1">⭐ 泰國兒童才藝發展基金會 🌟</span>
   {% if session.get('user') %}
   <div class="d-flex align-items-center">
-    <span class="me-3">🌟 首席才藝觀察員</span>
+    <span class="me-3">{% if session.get('role') == 'manager' %}🌟 首席才藝觀察員{% else %}⭐ 見習才藝觀察員{% endif %}</span>
     <a class="btn btn-outline-light btn-sm" href="{{ url_for('auth.logout') }}">登出</a>
   </div>
   {% endif %}

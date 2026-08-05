@@ -32,11 +32,15 @@ def recalculate(product_id, warehouse_id):
         WHERE dt.ProductId = %s AND h.WarehouseId = %s
         GROUP BY h.InboundDate
     """, (product_id, warehouse_id))
+    # Only APPROVED outbound docs affect stock — a Pending/Rejected one
+    # is excluded here, which is also how approve/reject/edit-resets-to-
+    # Pending all "just work" via the same recalculate() call: whichever
+    # status a doc is in, this filter alone decides whether it counts.
     outbound_rows = db.query("""
         SELECT h.OutboundDate AS d, SUM(dt.Quantity) AS qty
         FROM dbo.OutboundHeader h
         JOIN dbo.OutboundDetail dt ON dt.OutboundId = h.OutboundId
-        WHERE dt.ProductId = %s AND h.WarehouseId = %s
+        WHERE dt.ProductId = %s AND h.WarehouseId = %s AND h.Status = 'APPROVED'
         GROUP BY h.OutboundDate
     """, (product_id, warehouse_id))
 

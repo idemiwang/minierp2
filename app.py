@@ -24,6 +24,7 @@ MENU = [
         "links": [
             {"title": "🚚 入庫管理", "endpoint": "inbound.list_view"},
             {"title": "🚛 出庫管理", "endpoint": "outbound.list_view"},
+            {"title": "🗂️ 待審核出庫單", "endpoint": "outbound.pending_view"},
         ],
     },
     {

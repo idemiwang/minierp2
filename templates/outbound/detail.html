@@ -14,8 +14,28 @@
   經手員工:{{ header.EmployeeId }} - {{ header.EmployeeName }}<br>
   倉別:{{ header.WarehouseName }}<br>
   單別:{{ header.DocTypeName }}<br>
-  客戶:{{ header.CustomerName or '(無)' }}
+  客戶:{{ header.CustomerName or '(無)' }}<br>
+  狀態:{{ status_labels.get(header.Status, header.Status) }}
+  {% if header.ApprovedBy %}(由 {{ header.ApprovedBy }} 於 {{ header.ApprovedAt }} 處理){% endif %}
 </p>
+
+{% if header.Status == 'PENDING' %}
+  {% if session.get('role') == 'manager' %}
+  <div class="mb-3">
+    <form action="{{ url_for('outbound.approve_view', outbound_id=header.OutboundId) }}" method="post" class="d-inline"
+          onsubmit="return confirm('確定要核准這張出庫單嗎?核准後會正式扣庫存。');">
+      <button type="submit" class="btn btn-success btn-sm">✅ 核准</button>
+    </form>
+    <form action="{{ url_for('outbound.reject_view', outbound_id=header.OutboundId) }}" method="post" class="d-inline"
+          onsubmit="return confirm('確定要拒絕這張出庫單嗎?');">
+      <button type="submit" class="btn btn-danger btn-sm">❌ 拒絕</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="text-muted small">此單待審核中,需要主管登入才能核准/拒絕。</p>
+  {% endif %}
+{% endif %}
+
 <table class="table table-sm table-striped table-doc">
   <thead><tr><th>行號</th><th>物料編號</th><th>物料名稱</th><th>數量</th></tr></thead>
   <tbody>
