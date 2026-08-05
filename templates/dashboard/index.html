@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}儀表板 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>📊 儀表板</h3>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">🐻</div>
+        <div class="fs-4 fw-bold">{{ counts.Product }}</div>
+        <div class="text-muted small">物料數</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">🎀</div>
+        <div class="fs-4 fw-bold">{{ counts.Employee }}</div>
+        <div class="text-muted small">員工數</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">🧑‍🤝‍🧑</div>
+        <div class="fs-4 fw-bold">{{ counts.Customer }}</div>
+        <div class="text-muted small">客戶數</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">📦</div>
+        <div class="fs-4 fw-bold">{{ counts.Vendor }}</div>
+        <div class="text-muted small">廠商數</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">📅</div>
+        <div class="fs-4 fw-bold">{{ month_sales }}</div>
+        <div class="text-muted small">本月業績總額</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card text-center h-100">
+      <div class="card-body">
+        <div class="fs-2">🗓️</div>
+        <div class="fs-4 fw-bold">{{ year_sales }}</div>
+        <div class="text-muted small">本年業績總額</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <a href="{{ url_for('reports.low_stock_view') }}" class="text-decoration-none">
+      <div class="card text-center h-100 {% if low_stock_count > 0 %}table-danger{% endif %}">
+        <div class="card-body">
+          <div class="fs-2">⚠️</div>
+          <div class="fs-4 fw-bold">{{ low_stock_count }}</div>
+          <div class="text-muted small">低庫存警示(點我查看)</div>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<h5>🔥 熱銷物料 Top 5(依出庫數量)</h5>
+<table class="table table-sm table-striped" style="max-width: 600px;">
+  <thead><tr><th>排名</th><th>物料編號</th><th>物料名稱</th><th>累計出庫數量</th></tr></thead>
+  <tbody>
+    {% for p in top_products %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><a href="{{ url_for('product.detail_view', product_id=p.ProductId) }}">{{ p.ProductId }}</a></td>
+      <td>{{ p.ProductName }}</td>
+      <td>{{ p.TotalQty }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無出庫紀錄</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

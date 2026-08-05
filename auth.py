@@ -20,8 +20,8 @@ def enforce_login():
 @bp.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user"):
-        return redirect(url_for("dashboard"))
-    next_url = request.values.get("next") or url_for("dashboard")
+        return redirect(url_for("dashboard.index_view"))
+    next_url = request.values.get("next") or url_for("dashboard.index_view")
     if request.method == "POST":
         username = request.form.get("username", "")
         password = request.form.get("password", "")

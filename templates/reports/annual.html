@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}年度分析 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>📅 年度分析</h3>
+<p class="text-muted small">業績總額 = 出庫單明細數量 × 物料單價,加總而成。</p>
+
+<h5>年度總覽</h5>
+<table class="table table-sm table-striped" style="max-width: 400px;">
+  <thead><tr><th>年度</th><th>業績總額</th></tr></thead>
+  <tbody>
+    {% for r in yearly_totals %}
+    <tr {% if r.Yr == selected_year %}class="table-danger"{% endif %}>
+      <td><a href="{{ url_for('reports.annual_view', year=r.Yr) }}">{{ r.Yr }}</a></td>
+      <td>{{ r.Total }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="2" class="text-center text-muted">尚無出庫紀錄</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h5 class="mt-4">{{ selected_year }} 年每月業績趨勢</h5>
+<form method="get" class="row g-2 mb-3 align-items-end" style="max-width: 300px;">
+  <div class="col-auto">
+    <label class="form-label">選擇年度</label>
+    <select name="year" class="form-select" onchange="this.form.submit()">
+      {% for y in available_years %}
+      <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+      {% else %}
+      <option value="{{ selected_year }}" selected>{{ selected_year }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+
+<div style="max-width: 700px;">
+  <canvas id="monthlyChart"></canvas>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+const monthlyTotals = {{ monthly_totals | tojson }};
+const ctx = document.getElementById('monthlyChart');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    datasets: [{
+      label: '{{ selected_year }} 年業績總額',
+      data: monthlyTotals,
+      backgroundColor: '#F4A9BB',
+      borderRadius: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: { legend: { display: false } },
+    scales: { y: { beginAtZero: true } }
+  }
+});
+</script>
+{% endblock %}

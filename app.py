@@ -1,11 +1,17 @@
-from flask import Flask, redirect, url_for
+from flask import Flask
 
 import auth
 import db
 from config import Config
-from blueprints import product, employee, inbound, outbound, reports, warehouse, doctype, customer, vendor
+from blueprints import product, employee, inbound, outbound, reports, warehouse, doctype, customer, vendor, dashboard
 
 MENU = [
+    {
+        "title": "🏠 首頁",
+        "links": [
+            {"title": "📊 儀表板", "endpoint": "dashboard.index_view"},
+        ],
+    },
     {
         "title": "🧸 主數據",
         "links": [
@@ -44,6 +50,7 @@ MENU = [
             {"title": "⚠️ 庫存警示", "endpoint": "reports.low_stock_view"},
             {"title": "📈 員工業績", "endpoint": "reports.employee_performance_view"},
             {"title": "🏆 客戶排行", "endpoint": "reports.customer_ranking_view"},
+            {"title": "📅 年度分析", "endpoint": "reports.annual_view"},
         ],
     },
 ]
@@ -66,14 +73,11 @@ def create_app():
     app.register_blueprint(doctype.bp, url_prefix="/doctypes")
     app.register_blueprint(customer.bp, url_prefix="/customers")
     app.register_blueprint(vendor.bp, url_prefix="/vendors")
+    app.register_blueprint(dashboard.bp, url_prefix="/")
 
     @app.context_processor
     def inject_menu():
         return {"menu": MENU}
-
-    @app.route("/")
-    def dashboard():
-        return redirect(url_for("product.list_view"))
 
     return app
 

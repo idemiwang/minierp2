@@ -1,3 +1,5 @@
+from datetime import date
+
 from flask import Blueprint, render_template, request, send_file
 
 import db
@@ -333,3 +335,45 @@ def customer_ranking_export():
     )
     return send_file(buf, as_attachment=True, download_name="customer_ranking.xlsx",
                       mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+@bp.route("/annual")
+def annual_view():
+    yearly_totals = db.query("""
+        SELECT YEAR(oh.OutboundDate) AS Yr,
+               ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS Total
+        FROM dbo.OutboundHeader oh
+        JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
+        JOIN dbo.Product p ON p.ProductId = od.ProductId
+        GROUP BY YEAR(oh.OutboundDate)
+        ORDER BY Yr
+    """)
+    available_years = [r["Yr"] for r in yearly_totals]
+
+    requested_year = request.args.get("year", type=int)
+    if requested_year in available_years:
+        selected_year = requested_year
+    elif available_years:
+        selected_year = available_years[-1]
+    else:
+        selected_year = date.today().year
+
+    monthly_rows = db.query("""
+        SELECT MONTH(oh.OutboundDate) AS Mo,
+               ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS Total
+        FROM dbo.OutboundHeader oh
+        JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
+        JOIN dbo.Product p ON p.ProductId = od.ProductId
+        WHERE YEAR(oh.OutboundDate) = %s
+        GROUP BY MONTH(oh.OutboundDate)
+    """, (selected_year,))
+    monthly_map = {r["Mo"]: float(r["Total"]) for r in monthly_rows}
+    monthly_totals = [monthly_map.get(m, 0.0) for m in range(1, 13)]
+
+    return render_template(
+        "reports/annual.html",
+        yearly_totals=yearly_totals,
+        available_years=available_years,
+        selected_year=selected_year,
+        monthly_totals=monthly_totals,
+    )

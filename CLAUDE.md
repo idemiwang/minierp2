@@ -237,6 +237,23 @@ backfilled cleanly): `SafetyStock` (安全庫存) and `UnitPrice` (單價).
   edit's own prior line — a deliberate approximation, not a precise
   guarantee.
 
+## Dashboard (首頁) and 年度分析
+
+`blueprints/dashboard.py` (`index_view`) is now the `/` route — replaces
+the old plain redirect to the product list. Shows master-data counts,
+this-month/this-year sales totals (same quantity×price formula as the
+performance reports), the low-stock count (linking to 庫存警示), and a
+top-5 best-sellers table (ranked by total outbound *quantity*, not sales
+value — "熱銷" reads as "moves a lot," not "worth a lot").
+
+年度分析 (`reports.annual_view`) shows a yearly-totals table (all years
+with any outbound data) plus a **Chart.js** bar chart (`templates/reports/
+annual.html`, loaded via CDN like Bootstrap/Google Fonts — first chart
+library in the app) of the selected year's monthly totals. Selecting a
+year re-submits the same GET route with `?year=`; months with no data are
+zero-filled in Python before charting (`monthly_totals` is always a
+12-element list, Jan→Dec).
+
 ## Vendor / Customer detail pages
 
 Mirror `product.py`/`employee.py`'s detail pattern: `vendor.detail_view`
