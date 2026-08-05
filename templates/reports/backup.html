@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}資料備份 - MiniERP{% endblock %}
+{% block content %}
+<h3>💾 完整資料備份</h3>
+<p class="text-muted">把整個資料庫(物料、員工、入庫單、出庫單、日結餘額表)一次匯出成一份 Excel,每張表各自一個分頁。建議定期下載一份存到自己電腦,尤其是資料庫可能會被清空或刪除的情況。</p>
+
+<div class="card" style="max-width: 420px;">
+  <div class="card-body">
+    <h6 class="card-title">目前資料筆數</h6>
+    <ul class="list-unstyled mb-3">
+      <li>🐻 物料:{{ counts.Product }} 筆</li>
+      <li>🎀 員工:{{ counts.Employee }} 筆</li>
+      <li>🚚 入庫單:{{ counts.InboundHeader }} 筆</li>
+      <li>🚛 出庫單:{{ counts.OutboundHeader }} 筆</li>
+      <li>🌸 日結餘額紀錄:{{ counts.InventoryDailyClosing }} 筆</li>
+    </ul>
+    <a href="{{ url_for('reports.backup_export') }}" class="btn btn-primary w-100">📦 下載完整備份 (Excel)</a>
+  </div>
+</div>
+{% endblock %}

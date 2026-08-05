@@ -58,6 +58,37 @@ def export_document(title, header_fields, header_data, line_columns, lines):
     return buf
 
 
+def export_workbook(sheets):
+    """Full-database-style backup: one workbook, one sheet per table.
+
+    sheets: list of (sheet_title, columns, rows). columns: list of
+    (label, key) pairs. rows: list of dicts.
+    """
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    for title, columns, rows in sheets:
+        ws = wb.create_sheet(title=title[:31])
+        for col_idx, (label, _key) in enumerate(columns, start=1):
+            cell = ws.cell(row=1, column=col_idx, value=label)
+            cell.font = Font(bold=True)
+            cell.fill = HEADER_FILL
+            cell.border = BORDER
+
+        for r_idx, row_data in enumerate(rows, start=2):
+            for col_idx, (_label, key) in enumerate(columns, start=1):
+                cell = ws.cell(row=r_idx, column=col_idx, value=row_data.get(key))
+                cell.border = BORDER
+
+        for col_idx in range(1, len(columns) + 1):
+            ws.column_dimensions[get_column_letter(col_idx)].width = 16
+
+    buf = BytesIO()
+    wb.save(buf)
+    buf.seek(0)
+    return buf
+
+
 def export_table(title, columns, rows):
     """Plain tabular export for the report/query screens.
 

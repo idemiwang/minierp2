@@ -26,6 +26,7 @@ MENU = [
             {"title": "📋 入出單據", "endpoint": "reports.header_view"},
             {"title": "📝 入出明細", "endpoint": "reports.detail_view"},
             {"title": "🌸 日結餘額表", "endpoint": "reports.closing_view"},
+            {"title": "💾 資料備份", "endpoint": "reports.backup_view"},
         ],
     },
 ]
