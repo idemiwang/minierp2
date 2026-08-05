@@ -18,7 +18,11 @@ services:
         sync: false
       - key: APP_SECRET_KEY
         sync: false
-      - key: APP_USERNAME
+      - key: EMPLOYEE_USERNAME
         sync: false
-      - key: APP_PASSWORD_HASH
+      - key: EMPLOYEE_PASSWORD_HASH
+        sync: false
+      - key: MANAGER_USERNAME
+        sync: false
+      - key: MANAGER_PASSWORD_HASH
         sync: false
