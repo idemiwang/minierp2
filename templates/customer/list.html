@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}客戶管理 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>🧑‍🤝‍🧑 客戶管理</h3>
+  <a href="{{ url_for('customer.create_view') }}" class="btn btn-primary">+ 新增客戶</a>
+</div>
+<table class="table table-striped table-hover">
+  <thead><tr><th>客戶編號</th><th>客戶名稱</th><th>電話</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for c in customers %}
+    <tr>
+      <td>{{ c.CustomerId }}</td>
+      <td>{{ c.CustomerName }}</td>
+      <td>{{ c.Phone or '' }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('customer.edit_view', customer_id=c.CustomerId) }}" class="btn btn-sm btn-outline-secondary">編輯</a>
+        <form action="{{ url_for('customer.delete_view', customer_id=c.CustomerId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要刪除客戶 {{ c.CustomerId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

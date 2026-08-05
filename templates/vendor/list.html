@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}廠商管理 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>📦 廠商管理</h3>
+  <a href="{{ url_for('vendor.create_view') }}" class="btn btn-primary">+ 新增廠商</a>
+</div>
+<table class="table table-striped table-hover">
+  <thead><tr><th>廠商編號</th><th>廠商名稱</th><th>電話</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for v in vendors %}
+    <tr>
+      <td>{{ v.VendorId }}</td>
+      <td>{{ v.VendorName }}</td>
+      <td>{{ v.Phone or '' }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('vendor.edit_view', vendor_id=v.VendorId) }}" class="btn btn-sm btn-outline-secondary">編輯</a>
+        <form action="{{ url_for('vendor.delete_view', vendor_id=v.VendorId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要刪除廠商 {{ v.VendorId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

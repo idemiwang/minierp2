@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ '編輯單別' if doctype else '新增單別' }} - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>{{ '編輯單別 ' + doctype.DocTypeId if doctype else '新增單別' }}</h3>
+<form method="post" class="mt-3" style="max-width: 480px;">
+  {% if not doctype %}
+  <div class="mb-3">
+    <label class="form-label">單別編號</label>
+    <input type="text" class="form-control" value="(系統自動編號)" disabled>
+  </div>
+  {% endif %}
+  <div class="mb-3">
+    <label class="form-label">單別名稱</label>
+    <input type="text" name="doctype_name" class="form-control" value="{{ form_values.doctype_name }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">方向</label>
+    <select name="direction" class="form-select" required>
+      <option value="IN" {% if form_values.direction == 'IN' %}selected{% endif %}>入庫</option>
+      <option value="OUT" {% if form_values.direction == 'OUT' %}selected{% endif %}>出庫</option>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">儲存</button>
+  <a href="{{ url_for('doctype.list_view') }}" class="btn btn-outline-secondary">取消</a>
+</form>
+{% endblock %}

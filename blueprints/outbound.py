@@ -18,6 +18,18 @@ def _employees():
     return db.query("SELECT EmployeeId, EmployeeName FROM dbo.Employee ORDER BY EmployeeId")
 
 
+def _warehouses():
+    return db.query("SELECT WarehouseId, WarehouseName FROM dbo.Warehouse ORDER BY WarehouseId")
+
+
+def _doctypes():
+    return db.query("SELECT DocTypeId, DocTypeName FROM dbo.DocType WHERE Direction = 'OUT' ORDER BY DocTypeId")
+
+
+def _customers():
+    return db.query("SELECT CustomerId, CustomerName FROM dbo.Customer ORDER BY CustomerId")
+
+
 def _parse_lines(form, product_map):
     lines = []
     for pid, qty in zip(form.getlist("product_id[]"), form.getlist("quantity[]")):
@@ -38,9 +50,13 @@ def _parse_lines(form, product_map):
 def list_view():
     headers = db.query("""
         SELECT h.OutboundId, h.OutboundDate, h.EmployeeId, e.EmployeeName,
+               w.WarehouseName, dt.DocTypeName, c.CustomerName,
                (SELECT COUNT(*) FROM dbo.OutboundDetail d WHERE d.OutboundId = h.OutboundId) AS LineCount
         FROM dbo.OutboundHeader h
         JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        LEFT JOIN dbo.Customer c ON c.CustomerId = h.CustomerId
         ORDER BY h.OutboundDate DESC, h.OutboundId DESC
     """)
     return render_template("outbound/list.html", headers=headers)
@@ -50,25 +66,36 @@ def list_view():
 def create_view():
     products = _products()
     employees = _employees()
+    warehouses = _warehouses()
+    doctypes = _doctypes()
+    customers = _customers()
     product_map = {p["ProductId"]: p["ProductName"] for p in products}
 
     if request.method == "POST":
         outbound_date = request.form.get("outbound_date") or date.today().isoformat()
         employee_id = request.form.get("employee_id", "")
+        warehouse_id = request.form.get("warehouse_id", "")
+        doctype_id = request.form.get("doctype_id", "")
+        customer_id = request.form.get("customer_id") or None
         lines = _parse_lines(request.form, product_map)
+        form_values = {"outbound_date": outbound_date, "employee_id": employee_id,
+                       "warehouse_id": warehouse_id, "doctype_id": doctype_id, "customer_id": customer_id or ""}
 
-        if not employee_id or not lines:
-            flash("請選擇員工,且至少需要一筆明細(數量需大於 0)", "error")
+        if not employee_id or not warehouse_id or not doctype_id or not lines:
+            flash("請選擇員工、倉別與單別,且至少需要一筆明細(數量需大於 0)", "error")
             return render_template("outbound/form.html", header=None, lines=[],
                                     products=products, employees=employees,
-                                    form_values={"outbound_date": outbound_date, "employee_id": employee_id})
+                                    warehouses=warehouses, doctypes=doctypes, customers=customers,
+                                    form_values=form_values)
 
         def insert(new_id):
             with db.transaction() as conn:
                 cur = conn.cursor()
                 cur.execute(
-                    "INSERT INTO dbo.OutboundHeader (OutboundId, OutboundDate, EmployeeId) VALUES (%s, %s, %s)",
-                    (new_id, outbound_date, employee_id),
+                    "INSERT INTO dbo.OutboundHeader "
+                    "(OutboundId, OutboundDate, EmployeeId, WarehouseId, DocTypeId, CustomerId) "
+                    "VALUES (%s, %s, %s, %s, %s, %s)",
+                    (new_id, outbound_date, employee_id, warehouse_id, doctype_id, customer_id),
                 )
                 for line_num, (pid, pname, qty) in enumerate(lines, start=1):
                     cur.execute(
@@ -77,7 +104,7 @@ def create_view():
                         (new_id, line_num, pid, pname, qty),
                     )
                 for pid in {pid for pid, _, _ in lines}:
-                    inventory_closing.recalculate(pid)
+                    inventory_closing.recalculate(pid, warehouse_id)
 
         new_id = id_generator.generate_with_retry(id_generator.next_outbound_id, insert)
         flash(f"已新增出庫單 {new_id}", "success")
@@ -85,7 +112,9 @@ def create_view():
 
     return render_template("outbound/form.html", header=None, lines=[],
                             products=products, employees=employees,
-                            form_values={"outbound_date": date.today().isoformat(), "employee_id": ""})
+                            warehouses=warehouses, doctypes=doctypes, customers=customers,
+                            form_values={"outbound_date": date.today().isoformat(), "employee_id": "",
+                                         "warehouse_id": "", "doctype_id": "", "customer_id": ""})
 
 
 @bp.route("/<outbound_id>/edit", methods=["GET", "POST"])
@@ -97,30 +126,41 @@ def edit_view(outbound_id):
 
     products = _products()
     employees = _employees()
+    warehouses = _warehouses()
+    doctypes = _doctypes()
+    customers = _customers()
     product_map = {p["ProductId"]: p["ProductName"] for p in products}
 
     if request.method == "POST":
         outbound_date = request.form.get("outbound_date") or header["OutboundDate"]
         employee_id = request.form.get("employee_id", "")
+        warehouse_id = request.form.get("warehouse_id", "")
+        doctype_id = request.form.get("doctype_id", "")
+        customer_id = request.form.get("customer_id") or None
         lines = _parse_lines(request.form, product_map)
         existing_lines = db.query(
             "SELECT ProductId, Quantity FROM dbo.OutboundDetail WHERE OutboundId = %s ORDER BY LineNum",
             (outbound_id,),
         )
+        old_warehouse_id = header["WarehouseId"]
+        form_values = {"outbound_date": outbound_date, "employee_id": employee_id,
+                       "warehouse_id": warehouse_id, "doctype_id": doctype_id, "customer_id": customer_id or ""}
 
-        if not employee_id or not lines:
-            flash("請選擇員工,且至少需要一筆明細(數量需大於 0)", "error")
+        if not employee_id or not warehouse_id or not doctype_id or not lines:
+            flash("請選擇員工、倉別與單別,且至少需要一筆明細(數量需大於 0)", "error")
             return render_template("outbound/form.html", header=header,
                                     lines=[{"ProductId": p, "Quantity": q} for p, q in
                                            zip(request.form.getlist("product_id[]"), request.form.getlist("quantity[]"))],
                                     products=products, employees=employees,
-                                    form_values={"outbound_date": outbound_date, "employee_id": employee_id})
+                                    warehouses=warehouses, doctypes=doctypes, customers=customers,
+                                    form_values=form_values)
 
         with db.transaction() as conn:
             cur = conn.cursor()
             cur.execute(
-                "UPDATE dbo.OutboundHeader SET OutboundDate = %s, EmployeeId = %s WHERE OutboundId = %s",
-                (outbound_date, employee_id, outbound_id),
+                "UPDATE dbo.OutboundHeader SET OutboundDate = %s, EmployeeId = %s, WarehouseId = %s, "
+                "DocTypeId = %s, CustomerId = %s WHERE OutboundId = %s",
+                (outbound_date, employee_id, warehouse_id, doctype_id, customer_id, outbound_id),
             )
             cur.execute("DELETE FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,))
             for line_num, (pid, pname, qty) in enumerate(lines, start=1):
@@ -129,9 +169,11 @@ def edit_view(outbound_id):
                     "VALUES (%s, %s, %s, %s, %s)",
                     (outbound_id, line_num, pid, pname, qty),
                 )
-            affected = {r["ProductId"] for r in existing_lines} | {pid for pid, _, _ in lines}
-            for pid in affected:
-                inventory_closing.recalculate(pid)
+            affected_products = {r["ProductId"] for r in existing_lines} | {pid for pid, _, _ in lines}
+            affected_warehouses = {old_warehouse_id, warehouse_id}
+            for pid in affected_products:
+                for wid in affected_warehouses:
+                    inventory_closing.recalculate(pid, wid)
         flash("已更新出庫單", "success")
         return redirect(url_for("outbound.detail_view", outbound_id=outbound_id))
 
@@ -140,20 +182,25 @@ def edit_view(outbound_id):
     )
     return render_template("outbound/form.html", header=header, lines=lines,
                             products=products, employees=employees,
-                            form_values={"outbound_date": str(header["OutboundDate"]), "employee_id": header["EmployeeId"]})
+                            warehouses=warehouses, doctypes=doctypes, customers=customers,
+                            form_values={"outbound_date": str(header["OutboundDate"]), "employee_id": header["EmployeeId"],
+                                         "warehouse_id": header["WarehouseId"], "doctype_id": header["DocTypeId"],
+                                         "customer_id": header["CustomerId"] or ""})
 
 
 @bp.route("/<outbound_id>/delete", methods=["POST"])
 def delete_view(outbound_id):
-    affected = {r["ProductId"] for r in db.query(
+    header = db.query_one("SELECT WarehouseId FROM dbo.OutboundHeader WHERE OutboundId = %s", (outbound_id,))
+    affected_products = {r["ProductId"] for r in db.query(
         "SELECT DISTINCT ProductId FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,)
     )}
     with db.transaction() as conn:
         cur = conn.cursor()
         cur.execute("DELETE FROM dbo.OutboundDetail WHERE OutboundId = %s", (outbound_id,))
         cur.execute("DELETE FROM dbo.OutboundHeader WHERE OutboundId = %s", (outbound_id,))
-        for pid in affected:
-            inventory_closing.recalculate(pid)
+        if header:
+            for pid in affected_products:
+                inventory_closing.recalculate(pid, header["WarehouseId"])
     flash("已刪除出庫單", "success")
     return redirect(url_for("outbound.list_view"))
 
@@ -161,8 +208,12 @@ def delete_view(outbound_id):
 @bp.route("/<outbound_id>")
 def detail_view(outbound_id):
     header = db.query_one("""
-        SELECT h.*, e.EmployeeName FROM dbo.OutboundHeader h
+        SELECT h.*, e.EmployeeName, w.WarehouseName, dt.DocTypeName, c.CustomerName
+        FROM dbo.OutboundHeader h
         JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        LEFT JOIN dbo.Customer c ON c.CustomerId = h.CustomerId
         WHERE h.OutboundId = %s
     """, (outbound_id,))
     if not header:
@@ -177,8 +228,12 @@ def detail_view(outbound_id):
 @bp.route("/<outbound_id>/export")
 def export_view(outbound_id):
     header = db.query_one("""
-        SELECT h.*, e.EmployeeName FROM dbo.OutboundHeader h
+        SELECT h.*, e.EmployeeName, w.WarehouseName, dt.DocTypeName, c.CustomerName
+        FROM dbo.OutboundHeader h
         JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        LEFT JOIN dbo.Customer c ON c.CustomerId = h.CustomerId
         WHERE h.OutboundId = %s
     """, (outbound_id,))
     if not header:
@@ -190,7 +245,8 @@ def export_view(outbound_id):
     buf = export_document(
         title=f"出庫單 {outbound_id}",
         header_fields=[("出庫單號", "OutboundId"), ("出庫日期", "OutboundDate"),
-                        ("經手員工", "EmployeeName")],
+                        ("經手員工", "EmployeeName"), ("倉別", "WarehouseName"),
+                        ("單別", "DocTypeName"), ("客戶", "CustomerName")],
         header_data=header,
         line_columns=[("行號", "LineNum"), ("物料編號", "ProductId"),
                        ("物料名稱", "ProductName"), ("數量", "Quantity")],

@@ -9,7 +9,13 @@
     <a href="{{ url_for('outbound.list_view') }}" class="btn btn-outline-secondary btn-sm">返回列表</a>
   </div>
 </div>
-<p>日期:{{ header.OutboundDate }}<br>經手員工:{{ header.EmployeeId }} - {{ header.EmployeeName }}</p>
+<p>
+  日期:{{ header.OutboundDate }}<br>
+  經手員工:{{ header.EmployeeId }} - {{ header.EmployeeName }}<br>
+  倉別:{{ header.WarehouseName }}<br>
+  單別:{{ header.DocTypeName }}<br>
+  客戶:{{ header.CustomerName or '(無)' }}
+</p>
 <table class="table table-sm table-striped table-doc">
   <thead><tr><th>行號</th><th>物料編號</th><th>物料名稱</th><th>數量</th></tr></thead>
   <tbody>

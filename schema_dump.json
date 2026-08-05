@@ -7,6 +7,16 @@
     },
     {
       "schema_name": "dbo",
+      "table_name": "Customer",
+      "object_id": 1413580074
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "object_id": 1365579903
+    },
+    {
+      "schema_name": "dbo",
       "table_name": "Employee",
       "object_id": 949578421
     },
@@ -23,7 +33,7 @@
     {
       "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
-      "object_id": 1285579618
+      "object_id": 1685581043
     },
     {
       "schema_name": "dbo",
@@ -39,6 +49,21 @@
       "schema_name": "dbo",
       "table_name": "Product",
       "object_id": 981578535
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "object_id": 1477580302
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "object_id": 1445580188
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Warehouse",
+      "object_id": 1333579789
     }
   ],
   "columns": [
@@ -63,6 +88,78 @@
       "max_length": 8,
       "precision": 27,
       "scale": 7,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Customer",
+      "column_id": 1,
+      "column_name": "CustomerId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Customer",
+      "column_id": 2,
+      "column_name": "CustomerName",
+      "data_type": "nvarchar",
+      "max_length": 200,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Customer",
+      "column_id": 3,
+      "column_name": "Phone",
+      "data_type": "nvarchar",
+      "max_length": 100,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "column_id": 1,
+      "column_name": "DocTypeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "column_id": 2,
+      "column_name": "DocTypeName",
+      "data_type": "nvarchar",
+      "max_length": 200,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "column_id": 3,
+      "column_name": "Direction",
+      "data_type": "nvarchar",
+      "max_length": 6,
+      "precision": 0,
+      "scale": 0,
       "is_nullable": false,
       "is_identity": false
     },
@@ -200,6 +297,54 @@
     },
     {
       "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 4,
+      "column_name": "WarehouseId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 5,
+      "column_name": "DocTypeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 6,
+      "column_name": "VendorId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InboundHeader",
+      "column_id": 7,
+      "column_name": "CustomerId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
       "column_id": 1,
       "column_name": "ClosingDate",
@@ -226,6 +371,18 @@
       "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
       "column_id": 3,
+      "column_name": "WarehouseId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "InventoryDailyClosing",
+      "column_id": 4,
       "column_name": "OpeningQuantity",
       "data_type": "decimal",
       "max_length": 9,
@@ -237,7 +394,7 @@
     {
       "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
-      "column_id": 4,
+      "column_id": 5,
       "column_name": "InboundQuantity",
       "data_type": "decimal",
       "max_length": 9,
@@ -249,7 +406,7 @@
     {
       "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
-      "column_id": 5,
+      "column_id": 6,
       "column_name": "OutboundQuantity",
       "data_type": "decimal",
       "max_length": 9,
@@ -261,7 +418,7 @@
     {
       "schema_name": "dbo",
       "table_name": "InventoryDailyClosing",
-      "column_id": 6,
+      "column_id": 7,
       "column_name": "ClosingQuantity",
       "data_type": "decimal",
       "max_length": 9,
@@ -368,6 +525,54 @@
     },
     {
       "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 4,
+      "column_name": "WarehouseId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 5,
+      "column_name": "DocTypeId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 6,
+      "column_name": "VendorId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "OutboundHeader",
+      "column_id": 7,
+      "column_name": "CustomerId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
       "table_name": "Product",
       "column_id": 1,
       "column_name": "ProductId",
@@ -401,6 +606,102 @@
       "scale": 3,
       "is_nullable": false,
       "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "column_id": 1,
+      "column_name": "ProductId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "column_id": 2,
+      "column_name": "WarehouseId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "column_id": 3,
+      "column_name": "StockBalance",
+      "data_type": "decimal",
+      "max_length": 9,
+      "precision": 18,
+      "scale": 3,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "column_id": 1,
+      "column_name": "VendorId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "column_id": 2,
+      "column_name": "VendorName",
+      "data_type": "nvarchar",
+      "max_length": 200,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "column_id": 3,
+      "column_name": "Phone",
+      "data_type": "nvarchar",
+      "max_length": 100,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": true,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Warehouse",
+      "column_id": 1,
+      "column_name": "WarehouseId",
+      "data_type": "nvarchar",
+      "max_length": 80,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Warehouse",
+      "column_id": 2,
+      "column_name": "WarehouseName",
+      "data_type": "nvarchar",
+      "max_length": 200,
+      "precision": 0,
+      "scale": 0,
+      "is_nullable": false,
+      "is_identity": false
     }
   ],
   "primary_keys": [
@@ -408,6 +709,18 @@
       "schema_name": "dbo",
       "table_name": "__SchemaMigrations",
       "column_name": "Filename",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Customer",
+      "column_name": "CustomerId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "column_name": "DocTypeId",
       "key_ordinal": 1
     },
     {
@@ -448,6 +761,12 @@
     },
     {
       "schema_name": "dbo",
+      "table_name": "InventoryDailyClosing",
+      "column_name": "WarehouseId",
+      "key_ordinal": 3
+    },
+    {
+      "schema_name": "dbo",
       "table_name": "OutboundDetail",
       "column_name": "OutboundId",
       "key_ordinal": 1
@@ -468,6 +787,30 @@
       "schema_name": "dbo",
       "table_name": "Product",
       "column_name": "ProductId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "column_name": "ProductId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "column_name": "WarehouseId",
+      "key_ordinal": 2
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "column_name": "VendorId",
+      "key_ordinal": 1
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Warehouse",
+      "column_name": "WarehouseId",
       "key_ordinal": 1
     }
   ],
@@ -495,6 +838,28 @@
       "ref_column": "ProductId"
     },
     {
+      "fk_name": "FK_InboundHeader_Customer",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundHeader",
+      "parent_column": "CustomerId",
+      "ref_schema": "dbo",
+      "ref_table": "Customer",
+      "ref_column": "CustomerId"
+    },
+    {
+      "fk_name": "FK_InboundHeader_DocType",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundHeader",
+      "parent_column": "DocTypeId",
+      "ref_schema": "dbo",
+      "ref_table": "DocType",
+      "ref_column": "DocTypeId"
+    },
+    {
       "fk_name": "FK_InboundHeader_Employee",
       "is_disabled": false,
       "is_not_trusted": false,
@@ -506,6 +871,28 @@
       "ref_column": "EmployeeId"
     },
     {
+      "fk_name": "FK_InboundHeader_Vendor",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundHeader",
+      "parent_column": "VendorId",
+      "ref_schema": "dbo",
+      "ref_table": "Vendor",
+      "ref_column": "VendorId"
+    },
+    {
+      "fk_name": "FK_InboundHeader_Warehouse",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InboundHeader",
+      "parent_column": "WarehouseId",
+      "ref_schema": "dbo",
+      "ref_table": "Warehouse",
+      "ref_column": "WarehouseId"
+    },
+    {
       "fk_name": "FK_InventoryDailyClosing_Product",
       "is_disabled": false,
       "is_not_trusted": false,
@@ -515,6 +902,17 @@
       "ref_schema": "dbo",
       "ref_table": "Product",
       "ref_column": "ProductId"
+    },
+    {
+      "fk_name": "FK_InventoryDailyClosing_Warehouse",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "InventoryDailyClosing",
+      "parent_column": "WarehouseId",
+      "ref_schema": "dbo",
+      "ref_table": "Warehouse",
+      "ref_column": "WarehouseId"
     },
     {
       "fk_name": "FK_OutboundDetail_OutboundHeader",
@@ -539,6 +937,28 @@
       "ref_column": "ProductId"
     },
     {
+      "fk_name": "FK_OutboundHeader_Customer",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundHeader",
+      "parent_column": "CustomerId",
+      "ref_schema": "dbo",
+      "ref_table": "Customer",
+      "ref_column": "CustomerId"
+    },
+    {
+      "fk_name": "FK_OutboundHeader_DocType",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundHeader",
+      "parent_column": "DocTypeId",
+      "ref_schema": "dbo",
+      "ref_table": "DocType",
+      "ref_column": "DocTypeId"
+    },
+    {
       "fk_name": "FK_OutboundHeader_Employee",
       "is_disabled": false,
       "is_not_trusted": false,
@@ -548,6 +968,50 @@
       "ref_schema": "dbo",
       "ref_table": "Employee",
       "ref_column": "EmployeeId"
+    },
+    {
+      "fk_name": "FK_OutboundHeader_Vendor",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundHeader",
+      "parent_column": "VendorId",
+      "ref_schema": "dbo",
+      "ref_table": "Vendor",
+      "ref_column": "VendorId"
+    },
+    {
+      "fk_name": "FK_OutboundHeader_Warehouse",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "OutboundHeader",
+      "parent_column": "WarehouseId",
+      "ref_schema": "dbo",
+      "ref_table": "Warehouse",
+      "ref_column": "WarehouseId"
+    },
+    {
+      "fk_name": "FK_ProductWarehouseStock_Product",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "ProductWarehouseStock",
+      "parent_column": "ProductId",
+      "ref_schema": "dbo",
+      "ref_table": "Product",
+      "ref_column": "ProductId"
+    },
+    {
+      "fk_name": "FK_ProductWarehouseStock_Warehouse",
+      "is_disabled": false,
+      "is_not_trusted": false,
+      "parent_schema": "dbo",
+      "parent_table": "ProductWarehouseStock",
+      "parent_column": "WarehouseId",
+      "ref_schema": "dbo",
+      "ref_table": "Warehouse",
+      "ref_column": "WarehouseId"
     }
   ],
   "views": [
@@ -564,22 +1028,32 @@
     {
       "schema_name": "dbo",
       "table_name": "__SchemaMigrations",
-      "row_count": 3
+      "row_count": 4
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Customer",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "DocType",
+      "row_count": 8
     },
     {
       "schema_name": "dbo",
       "table_name": "Employee",
-      "row_count": 5
+      "row_count": 7
     },
     {
       "schema_name": "dbo",
       "table_name": "InboundDetail",
-      "row_count": 3
+      "row_count": 10
     },
     {
       "schema_name": "dbo",
       "table_name": "InboundHeader",
-      "row_count": 2
+      "row_count": 8
     },
     {
       "schema_name": "dbo",
@@ -599,7 +1073,22 @@
     {
       "schema_name": "dbo",
       "table_name": "Product",
-      "row_count": 3
+      "row_count": 7
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "ProductWarehouseStock",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Vendor",
+      "row_count": 0
+    },
+    {
+      "schema_name": "dbo",
+      "table_name": "Warehouse",
+      "row_count": 1
     }
   ]
 }

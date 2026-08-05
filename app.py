@@ -3,7 +3,7 @@ from flask import Flask, redirect, url_for
 import auth
 import db
 from config import Config
-from blueprints import product, employee, inbound, outbound, reports
+from blueprints import product, employee, inbound, outbound, reports, warehouse, doctype, customer, vendor
 
 MENU = [
     {
@@ -18,6 +18,15 @@ MENU = [
         "links": [
             {"title": "🚚 入庫管理", "endpoint": "inbound.list_view"},
             {"title": "🚛 出庫管理", "endpoint": "outbound.list_view"},
+        ],
+    },
+    {
+        "title": "🏢 往來與設定",
+        "links": [
+            {"title": "🏬 倉別管理", "endpoint": "warehouse.list_view"},
+            {"title": "🏷️ 單別管理", "endpoint": "doctype.list_view"},
+            {"title": "🧑‍🤝‍🧑 客戶管理", "endpoint": "customer.list_view"},
+            {"title": "📦 廠商管理", "endpoint": "vendor.list_view"},
         ],
     },
     {
@@ -45,6 +54,10 @@ def create_app():
     app.register_blueprint(inbound.bp, url_prefix="/inbound")
     app.register_blueprint(outbound.bp, url_prefix="/outbound")
     app.register_blueprint(reports.bp, url_prefix="/reports")
+    app.register_blueprint(warehouse.bp, url_prefix="/warehouses")
+    app.register_blueprint(doctype.bp, url_prefix="/doctypes")
+    app.register_blueprint(customer.bp, url_prefix="/customers")
+    app.register_blueprint(vendor.bp, url_prefix="/vendors")
 
     @app.context_processor
     def inject_menu():

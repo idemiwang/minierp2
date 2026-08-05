@@ -49,6 +49,30 @@ def next_outbound_id():
     return f"{prefix}{n:03d}"
 
 
+def next_warehouse_id():
+    rows = db.query("SELECT WarehouseId FROM dbo.Warehouse WHERE WarehouseId LIKE %s", ("W%",))
+    n = _next_numeric_suffix([r["WarehouseId"] for r in rows], "W")
+    return f"W{n:04d}"
+
+
+def next_doctype_id():
+    rows = db.query("SELECT DocTypeId FROM dbo.DocType WHERE DocTypeId LIKE %s", ("D%",))
+    n = _next_numeric_suffix([r["DocTypeId"] for r in rows], "D")
+    return f"D{n:04d}"
+
+
+def next_customer_id():
+    rows = db.query("SELECT CustomerId FROM dbo.Customer WHERE CustomerId LIKE %s", ("C%",))
+    n = _next_numeric_suffix([r["CustomerId"] for r in rows], "C")
+    return f"C{n:04d}"
+
+
+def next_vendor_id():
+    rows = db.query("SELECT VendorId FROM dbo.Vendor WHERE VendorId LIKE %s", ("V%",))
+    n = _next_numeric_suffix([r["VendorId"] for r in rows], "V")
+    return f"V{n:04d}"
+
+
 def generate_with_retry(generate_fn, insert_fn, attempts=3):
     """Call generate_fn() then insert_fn(id); retry on a PK collision."""
     last_exc = None

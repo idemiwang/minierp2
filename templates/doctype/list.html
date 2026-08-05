@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}單別管理 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>🏷️ 單別管理</h3>
+  <a href="{{ url_for('doctype.create_view') }}" class="btn btn-primary">+ 新增單別</a>
+</div>
+<table class="table table-striped table-hover">
+  <thead><tr><th>單別編號</th><th>單別名稱</th><th>方向</th><th class="text-end">操作</th></tr></thead>
+  <tbody>
+    {% for d in doctypes %}
+    <tr>
+      <td>{{ d.DocTypeId }}</td>
+      <td>{{ d.DocTypeName }}</td>
+      <td>{{ direction_labels.get(d.Direction, d.Direction) }}</td>
+      <td class="text-end">
+        <a href="{{ url_for('doctype.edit_view', doctype_id=d.DocTypeId) }}" class="btn btn-sm btn-outline-secondary">編輯</a>
+        <form action="{{ url_for('doctype.delete_view', doctype_id=d.DocTypeId) }}" method="post" class="d-inline"
+              onsubmit="return confirm('確定要刪除單別 {{ d.DocTypeId }} 嗎?');">
+          <button type="submit" class="btn btn-sm btn-outline-danger">刪除</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
