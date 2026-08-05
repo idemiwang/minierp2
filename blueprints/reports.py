@@ -169,7 +169,8 @@ def backup_view():
 def backup_export():
     sheets = [
         ("Product",
-         [("物料編號", "ProductId"), ("物料名稱", "ProductName"), ("庫存餘額", "StockBalance")],
+         [("物料編號", "ProductId"), ("物料名稱", "ProductName"), ("庫存餘額", "StockBalance"),
+          ("安全庫存", "SafetyStock"), ("單價", "UnitPrice")],
          db.query("SELECT * FROM dbo.Product ORDER BY ProductId")),
         ("Employee",
          [("員工編號", "EmployeeId"), ("姓名", "EmployeeName"), ("Email", "Email")],
@@ -213,4 +214,122 @@ def backup_export():
     ]
     buf = export_workbook(sheets)
     return send_file(buf, as_attachment=True, download_name="minierp2_backup.xlsx",
+                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+def _low_stock_rows():
+    return db.query("""
+        SELECT ProductId, ProductName, StockBalance, SafetyStock
+        FROM dbo.Product
+        WHERE StockBalance <= SafetyStock
+        ORDER BY (StockBalance - SafetyStock) ASC
+    """)
+
+
+@bp.route("/low-stock")
+def low_stock_view():
+    return render_template("reports/low_stock.html", rows=_low_stock_rows())
+
+
+@bp.route("/low-stock/export")
+def low_stock_export():
+    buf = export_table(
+        title="庫存警示",
+        columns=[("物料編號", "ProductId"), ("物料名稱", "ProductName"),
+                  ("庫存餘額", "StockBalance"), ("安全庫存", "SafetyStock")],
+        rows=_low_stock_rows(),
+    )
+    return send_file(buf, as_attachment=True, download_name="low_stock_alert.xlsx",
+                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+def _employee_performance_rows(args):
+    conditions, params = [], []
+    if args.get("date_from"):
+        conditions.append("oh.OutboundDate >= %s")
+        params.append(args["date_from"])
+    if args.get("date_to"):
+        conditions.append("oh.OutboundDate <= %s")
+        params.append(args["date_to"])
+    date_clause = (" AND " + " AND ".join(conditions)) if conditions else ""
+    return db.query(f"""
+        SELECT e.EmployeeId, e.EmployeeName,
+               ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS TotalSales
+        FROM dbo.Employee e
+        LEFT JOIN dbo.OutboundHeader oh ON oh.EmployeeId = e.EmployeeId {date_clause}
+        LEFT JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
+        LEFT JOIN dbo.Product p ON p.ProductId = od.ProductId
+        GROUP BY e.EmployeeId, e.EmployeeName
+        ORDER BY TotalSales DESC
+    """, tuple(params))
+
+
+@bp.route("/employee-performance")
+def employee_performance_view():
+    filters = {
+        "date_from": request.args.get("date_from", ""),
+        "date_to": request.args.get("date_to", ""),
+    }
+    rows = _employee_performance_rows(filters)
+    return render_template("reports/employee_performance.html", rows=rows, filters=filters)
+
+
+@bp.route("/employee-performance/export")
+def employee_performance_export():
+    filters = {
+        "date_from": request.args.get("date_from", ""),
+        "date_to": request.args.get("date_to", ""),
+    }
+    buf = export_table(
+        title="員工業績",
+        columns=[("員工編號", "EmployeeId"), ("姓名", "EmployeeName"), ("銷售總額", "TotalSales")],
+        rows=_employee_performance_rows(filters),
+    )
+    return send_file(buf, as_attachment=True, download_name="employee_performance.xlsx",
+                      mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+
+def _customer_ranking_rows(args):
+    conditions, params = [], []
+    if args.get("date_from"):
+        conditions.append("oh.OutboundDate >= %s")
+        params.append(args["date_from"])
+    if args.get("date_to"):
+        conditions.append("oh.OutboundDate <= %s")
+        params.append(args["date_to"])
+    date_clause = (" AND " + " AND ".join(conditions)) if conditions else ""
+    return db.query(f"""
+        SELECT c.CustomerId, c.CustomerName,
+               ISNULL(SUM(od.Quantity * p.UnitPrice), 0) AS TotalPurchase
+        FROM dbo.Customer c
+        LEFT JOIN dbo.OutboundHeader oh ON oh.CustomerId = c.CustomerId {date_clause}
+        LEFT JOIN dbo.OutboundDetail od ON od.OutboundId = oh.OutboundId
+        LEFT JOIN dbo.Product p ON p.ProductId = od.ProductId
+        GROUP BY c.CustomerId, c.CustomerName
+        ORDER BY TotalPurchase DESC
+    """, tuple(params))
+
+
+@bp.route("/customer-ranking")
+def customer_ranking_view():
+    filters = {
+        "date_from": request.args.get("date_from", ""),
+        "date_to": request.args.get("date_to", ""),
+    }
+    rows = _customer_ranking_rows(filters)
+    return render_template("reports/customer_ranking.html", rows=rows, filters=filters)
+
+
+@bp.route("/customer-ranking/export")
+def customer_ranking_export():
+    filters = {
+        "date_from": request.args.get("date_from", ""),
+        "date_to": request.args.get("date_to", ""),
+    }
+    buf = export_table(
+        title="客戶排行",
+        columns=[("客戶編號", "CustomerId"), ("客戶名稱", "CustomerName"), ("購買總額", "TotalPurchase")],
+        rows=_customer_ranking_rows(filters),
+    )
+    return send_file(buf, as_attachment=True, download_name="customer_ranking.xlsx",
                       mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")

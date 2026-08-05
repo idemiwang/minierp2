@@ -10,7 +10,7 @@
   <tbody>
     {% for v in vendors %}
     <tr>
-      <td>{{ v.VendorId }}</td>
+      <td><a href="{{ url_for('vendor.detail_view', vendor_id=v.VendorId) }}">{{ v.VendorId }}</a></td>
       <td>{{ v.VendorName }}</td>
       <td>{{ v.Phone or '' }}</td>
       <td class="text-end">

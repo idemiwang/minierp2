@@ -38,6 +38,14 @@ MENU = [
             {"title": "💾 資料備份", "endpoint": "reports.backup_view"},
         ],
     },
+    {
+        "title": "📊 經營分析",
+        "links": [
+            {"title": "⚠️ 庫存警示", "endpoint": "reports.low_stock_view"},
+            {"title": "📈 員工業績", "endpoint": "reports.employee_performance_view"},
+            {"title": "🏆 客戶排行", "endpoint": "reports.customer_ranking_view"},
+        ],
+    },
 ]
 
 

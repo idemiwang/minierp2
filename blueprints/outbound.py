@@ -46,6 +46,22 @@ def _parse_lines(form, product_map):
     return lines
 
 
+def _stock_shortfall_warnings(lines, warehouse_id):
+    """Non-blocking check against the warehouse's *current* (pre-save)
+    balance — an advisory warning, not an enforced rule (backorders are
+    tolerated), so it doesn't try to net out an edit's own prior line."""
+    warnings = []
+    for pid, pname, qty in lines:
+        row = db.query_one(
+            "SELECT StockBalance FROM dbo.ProductWarehouseStock WHERE ProductId = %s AND WarehouseId = %s",
+            (pid, warehouse_id),
+        )
+        available = float(row["StockBalance"]) if row else 0.0
+        if qty > available:
+            warnings.append(f"{pname}(需求 {qty:g},現有庫存 {available:g})")
+    return warnings
+
+
 @bp.route("/")
 def list_view():
     headers = db.query("""
@@ -88,6 +104,8 @@ def create_view():
                                     warehouses=warehouses, doctypes=doctypes, customers=customers,
                                     form_values=form_values)
 
+        stock_warnings = _stock_shortfall_warnings(lines, warehouse_id)
+
         def insert(new_id):
             with db.transaction() as conn:
                 cur = conn.cursor()
@@ -108,6 +126,8 @@ def create_view():
 
         new_id = id_generator.generate_with_retry(id_generator.next_outbound_id, insert)
         flash(f"已新增出庫單 {new_id}", "success")
+        if stock_warnings:
+            flash("⚠️ 庫存不足,已超賣:" + "、".join(stock_warnings), "warning")
         return redirect(url_for("outbound.detail_view", outbound_id=new_id))
 
     return render_template("outbound/form.html", header=None, lines=[],
@@ -155,6 +175,8 @@ def edit_view(outbound_id):
                                     warehouses=warehouses, doctypes=doctypes, customers=customers,
                                     form_values=form_values)
 
+        stock_warnings = _stock_shortfall_warnings(lines, warehouse_id)
+
         with db.transaction() as conn:
             cur = conn.cursor()
             cur.execute(
@@ -175,6 +197,8 @@ def edit_view(outbound_id):
                 for wid in affected_warehouses:
                     inventory_closing.recalculate(pid, wid)
         flash("已更新出庫單", "success")
+        if stock_warnings:
+            flash("⚠️ 庫存不足,已超賣:" + "、".join(stock_warnings), "warning")
         return redirect(url_for("outbound.detail_view", outbound_id=outbound_id))
 
     lines = db.query(

@@ -76,3 +76,22 @@ def delete_view(vendor_id):
     except pytds.tds_base.IntegrityError:
         flash("此廠商已有關聯資料,無法刪除", "error")
     return redirect(url_for("vendor.list_view"))
+
+
+@bp.route("/<vendor_id>")
+def detail_view(vendor_id):
+    vendor = db.query_one("SELECT * FROM dbo.Vendor WHERE VendorId = %s", (vendor_id,))
+    if not vendor:
+        flash("找不到該廠商", "error")
+        return redirect(url_for("vendor.list_view"))
+    orders = db.query("""
+        SELECT h.InboundId, h.InboundDate, e.EmployeeName, w.WarehouseName, dt.DocTypeName,
+               (SELECT COUNT(*) FROM dbo.InboundDetail d WHERE d.InboundId = h.InboundId) AS LineCount
+        FROM dbo.InboundHeader h
+        JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        WHERE h.VendorId = %s
+        ORDER BY h.InboundDate DESC, h.InboundId DESC
+    """, (vendor_id,))
+    return render_template("vendor/detail.html", vendor=vendor, orders=orders)

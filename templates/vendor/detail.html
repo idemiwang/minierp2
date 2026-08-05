@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}廠商明細 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>廠商明細 - {{ vendor.VendorId }} {{ vendor.VendorName }}</h3>
+<p>電話:{{ vendor.Phone or '(未填寫)' }}</p>
+<a href="{{ url_for('vendor.list_view') }}" class="btn btn-outline-secondary btn-sm mb-3">返回列表</a>
+
+<h5>歷史入庫單據</h5>
+<table class="table table-sm table-striped">
+  <thead><tr><th>入庫單號</th><th>日期</th><th>經手員工</th><th>倉別</th><th>單別</th><th>行數</th></tr></thead>
+  <tbody>
+    {% for o in orders %}
+    <tr>
+      <td><a href="{{ url_for('inbound.detail_view', inbound_id=o.InboundId) }}">{{ o.InboundId }}</a></td>
+      <td>{{ o.InboundDate }}</td>
+      <td>{{ o.EmployeeName }}</td>
+      <td>{{ o.WarehouseName }}</td>
+      <td>{{ o.DocTypeName }}</td>
+      <td>{{ o.LineCount }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="text-center text-muted">尚無入庫紀錄</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

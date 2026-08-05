@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}客戶排行 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>🏆 客戶排行</h3>
+<form method="get" class="row g-2 mb-3 align-items-end" style="max-width: 700px;">
+  <div class="col-auto">
+    <label class="form-label">日期起</label>
+    <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">日期迄</label>
+    <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">查詢</button>
+    <a href="{{ url_for('reports.customer_ranking_export', **filters) }}" class="btn btn-outline-success">匯出 Excel</a>
+  </div>
+</form>
+<p class="text-muted small">購買總額 = 該客戶所有出庫單明細數量 × 物料單價,加總而成,由高到低排序。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>排名</th><th>客戶編號</th><th>客戶名稱</th><th>購買總額</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td><a href="{{ url_for('customer.detail_view', customer_id=r.CustomerId) }}">{{ r.CustomerId }}</a></td>
+      <td>{{ r.CustomerName }}</td>
+      <td>{{ r.TotalPurchase }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無客戶資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

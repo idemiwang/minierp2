@@ -209,6 +209,41 @@ The 日結餘額表 report screen (`reports.closing_view`/`closing_export`,
 range, exportable to Excel — same query+export shape as the other report
 screens.
 
+## Low-stock alerts, sales value, and stock-check warnings
+
+`Product` has two more fields (migration 005, zero-default so they
+backfilled cleanly): `SafetyStock` (安全庫存) and `UnitPrice` (單價).
+
+- **庫存警示** (`reports.low_stock_view`): products where the global
+  rollup `StockBalance <= SafetyStock` — a simple, non-per-warehouse
+  comparison (per-warehouse thresholds were out of scope for this pass).
+- **員工業績** / **客戶排行** (`reports.employee_performance_view` /
+  `customer_ranking_view`): `SUM(OutboundDetail.Quantity *
+  Product.UnitPrice)` grouped by employee / customer, via `Employee`/
+  `Customer` `LEFT JOIN OutboundHeader` (date-range filter lives in the
+  `ON` clause, not `WHERE`, so employees/customers with zero sales in
+  range still appear) `LEFT JOIN OutboundDetail LEFT JOIN Product`. The
+  bonus-% multiplier on the employee report is a **client-side-only**
+  `<input>` (`templates/reports/employee_performance.html`) — never sent
+  to the server or stored, purely a live JS calculation over the
+  server-rendered sales totals.
+- **Outbound stock-check** (`blueprints/outbound.py`,
+  `_stock_shortfall_warnings`): before saving, compares each line's
+  quantity to that `(ProductId, WarehouseId)` pair's *current*
+  `ProductWarehouseStock.StockBalance`. This is advisory only — flashes a
+  `"warning"`-category message listing short items but **never blocks the
+  save** (backorders are tolerated, matching pre-existing negative-stock
+  data). It checks the pre-save balance and doesn't try to net out an
+  edit's own prior line — a deliberate approximation, not a precise
+  guarantee.
+
+## Vendor / Customer detail pages
+
+Mirror `product.py`/`employee.py`'s detail pattern: `vendor.detail_view`
+lists that vendor's `InboundHeader` history; `customer.detail_view` lists
+that customer's `OutboundHeader` history. Both list templates link their
+ID column to the detail page.
+
 ## GitHub
 
 Pushed to `https://github.com/idemiwang/minierp2` (public). Never commit a

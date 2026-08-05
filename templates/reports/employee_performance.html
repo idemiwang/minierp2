@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}員工業績 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<h3>📈 員工業績</h3>
+<form method="get" class="row g-2 mb-3 align-items-end" style="max-width: 700px;">
+  <div class="col-auto">
+    <label class="form-label">日期起</label>
+    <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+  </div>
+  <div class="col-auto">
+    <label class="form-label">日期迄</label>
+    <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">查詢</button>
+    <a href="{{ url_for('reports.employee_performance_export', **filters) }}" class="btn btn-outline-success">匯出 Excel</a>
+  </div>
+</form>
+<p class="text-muted small">銷售總額 = 該員工經手的出庫單明細數量 × 物料單價,加總而成。</p>
+<div class="mb-3" style="max-width: 320px;">
+  <label class="form-label">獎金比例(%,僅畫面試算,不會存檔)</label>
+  <input type="number" id="bonus-rate" class="form-control" value="5" step="0.1" min="0">
+</div>
+<table class="table table-sm table-striped">
+  <thead><tr><th>員工編號</th><th>姓名</th><th>銷售總額</th><th>建議獎金</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.EmployeeId }}</td>
+      <td>{{ r.EmployeeName }}</td>
+      <td class="sales-total" data-total="{{ r.TotalSales }}">{{ r.TotalSales }}</td>
+      <td class="bonus-amount">-</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">尚無資料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function recalcBonus() {
+  const rate = parseFloat(document.getElementById('bonus-rate').value) || 0;
+  document.querySelectorAll('.sales-total').forEach(function (cell) {
+    const total = parseFloat(cell.dataset.total) || 0;
+    const bonus = total * rate / 100;
+    cell.parentElement.querySelector('.bonus-amount').textContent = bonus.toFixed(2);
+  });
+}
+document.getElementById('bonus-rate').addEventListener('input', recalcBonus);
+recalcBonus();
+</script>
+{% endblock %}

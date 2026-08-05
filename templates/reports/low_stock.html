@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}庫存警示 - 泰國兒童才藝發展基金會{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3>⚠️ 庫存警示</h3>
+  <a href="{{ url_for('reports.low_stock_export') }}" class="btn btn-outline-success">匯出 Excel</a>
+</div>
+<p class="text-muted small">庫存餘額(全倉加總)低於或等於物料設定的「安全庫存」時,會列在這裡 —— 提醒該補貨了。安全庫存可以在物料管理裡編輯每個物料設定。</p>
+<table class="table table-sm table-striped">
+  <thead><tr><th>物料編號</th><th>物料名稱</th><th>庫存餘額</th><th>安全庫存</th></tr></thead>
+  <tbody>
+    {% for r in rows %}
+    <tr class="table-danger">
+      <td><a href="{{ url_for('product.detail_view', product_id=r.ProductId) }}">{{ r.ProductId }}</a></td>
+      <td>{{ r.ProductName }}</td>
+      <td>{{ r.StockBalance }}</td>
+      <td>{{ r.SafetyStock }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="text-center text-muted">🎉 目前沒有低於安全庫存的物料</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

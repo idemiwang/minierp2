@@ -10,7 +10,7 @@
   <tbody>
     {% for c in customers %}
     <tr>
-      <td>{{ c.CustomerId }}</td>
+      <td><a href="{{ url_for('customer.detail_view', customer_id=c.CustomerId) }}">{{ c.CustomerId }}</a></td>
       <td>{{ c.CustomerName }}</td>
       <td>{{ c.Phone or '' }}</td>
       <td class="text-end">

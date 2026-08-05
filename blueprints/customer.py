@@ -76,3 +76,22 @@ def delete_view(customer_id):
     except pytds.tds_base.IntegrityError:
         flash("此客戶已有關聯資料,無法刪除", "error")
     return redirect(url_for("customer.list_view"))
+
+
+@bp.route("/<customer_id>")
+def detail_view(customer_id):
+    customer = db.query_one("SELECT * FROM dbo.Customer WHERE CustomerId = %s", (customer_id,))
+    if not customer:
+        flash("找不到該客戶", "error")
+        return redirect(url_for("customer.list_view"))
+    orders = db.query("""
+        SELECT h.OutboundId, h.OutboundDate, e.EmployeeName, w.WarehouseName, dt.DocTypeName,
+               (SELECT COUNT(*) FROM dbo.OutboundDetail d WHERE d.OutboundId = h.OutboundId) AS LineCount
+        FROM dbo.OutboundHeader h
+        JOIN dbo.Employee e ON e.EmployeeId = h.EmployeeId
+        JOIN dbo.Warehouse w ON w.WarehouseId = h.WarehouseId
+        JOIN dbo.DocType dt ON dt.DocTypeId = h.DocTypeId
+        WHERE h.CustomerId = %s
+        ORDER BY h.OutboundDate DESC, h.OutboundId DESC
+    """, (customer_id,))
+    return render_template("customer/detail.html", customer=customer, orders=orders)
